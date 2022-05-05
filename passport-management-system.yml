@@ -8,17 +8,17 @@ info:
 host: "localhost:8080"
 basePath: "/api/v1"
 tags:
-  - name: "person"
+  - name: "persons"
     description: "Person-related operations"
-  - name: "passport"
+  - name: "passports"
     description: "Passport-related operations"
 schemes:
   - "http"
 paths:
-  /person:
+  /persons:
     post:
       tags:
-        - "person"
+        - "persons"
       summary: "Add a new person"
       description: "Adds a new person to the system"
       operationId: "addPerson"
@@ -32,18 +32,61 @@ paths:
           description: "Person object that needs to be added to the system"
           required: true
           schema:
-            $ref: "#/definitions/Person"
+            $ref: "#/definitions/CreatePersonDto"
       responses:
         "200":
           description: "New person has been created successfully"
           schema:
-            $ref: "#/definitions/Person"
+            $ref: "#/definitions/PersonDto"
         "400":
           description: "Invalid input data"
-  /person/{personId}:
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid input data"
+        "422":
+          description: "Business validation error"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 422
+              "message": "Business validation error"
     get:
       tags:
-        - "person"
+        - "persons"
+      summary: "Find person records using the values of the provided search parameter(s) or just return the list of all existing records"
+      description: "Returns person records matching the value of the provided search parameter(s) or the list of all existing records if no parameters are provided"
+      operationId: "searchPerson"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "passportNumber"
+          in: "query"
+          description: "Passport number that will be used for searching"
+          required: false
+          type: "string"
+      responses:
+        "200":
+          description: "Person information has been returned successfully"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/PersonDto"
+        "400":
+          description: "Invalid input data"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid parameters or their values are provided"
+  /persons/{personId}:
+    get:
+      tags:
+        - "persons"
       summary: "Get person by id"
       description: "Returns a person by their id in the system"
       operationId: "getPersonById"
@@ -60,14 +103,26 @@ paths:
         "200":
           description: "Person information has been returned successfully"
           schema:
-            $ref: "#/definitions/Person"
+            $ref: "#/definitions/PersonDto"
         "400":
           description: "Invalid ID"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid ID"
         "404":
           description: "Person is not found"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 404
+              "message": "Person is not found"
     put:
       tags:
-        - "person"
+        - "persons"
       summary: "Update person information by id"
       description: "Updates person information using the provided data"
       operationId: "updatePersonById"
@@ -87,20 +142,40 @@ paths:
           description: "Person object that will be used for updating information in the system"
           required: true
           schema:
-            $ref: "#/definitions/Person"
+            $ref: "#/definitions/CreatePersonDto"
       responses:
         "200":
           description: "Person information has been updated successfully"
           schema:
-            $ref: "#/definitions/Person"
+            $ref: "#/definitions/PersonDto"
         "400":
           description: "Invalid ID"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid ID"
         "404":
           description: "Person is not found"
-  /person/{personId}/passports:
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 404
+              "message": "Person is not found"
+        "422":
+          description: "Business validation error"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 422
+              "message": "Business validation error"
+  /persons/{personId}/passports:
     get:
       tags:
-        - "person"
+        - "persons"
       summary: "Get passports of a person by their id"
       description: "Returns a list of passports by the id of the person in the system"
       operationId: "getPassportsByPersonId"
@@ -119,39 +194,26 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/Passport"
+              $ref: "#/definitions/PassportDto"
         "400":
           description: "Invalid ID"
-        "404":
-          description: "Person is not found"
-  /person/findByPassportNumber:
-    get:
-      tags:
-        - "person"
-      summary: "Find person by passport number"
-      description: "Returns a person by their passport number"
-      operationId: "findPersonByPassportNumber"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "passportNumber"
-          in: "query"
-          description: "Passport number that will be used for searching"
-          required: true
-          type: "string"
-      responses:
-        "200":
-          description: "Person information has been returned successfully"
           schema:
-            $ref: "#/definitions/Person"
-        "400":
-          description: "Invalid passport number"
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid ID"
         "404":
           description: "Person is not found"
-  /passport:
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 404
+              "message": "Person is not found"
     post:
       tags:
-        - "passport"
+        - "persons"
       summary: "Add a new passport"
       description: "Adds a new passport to the system"
       operationId: "addPassport"
@@ -160,23 +222,51 @@ paths:
       produces:
         - "application/json"
       parameters:
+        - name: "personId"
+          in: "path"
+          description: "ID of the person for whom the passport needs to be created"
+          required: true
+          type: "integer"
+          format: "int64"
         - in: "body"
           name: "body"
           description: "Passport object that needs to be added to the system"
           required: true
           schema:
-            $ref: "#/definitions/Passport"
+            $ref: "#/definitions/CreatePassportDto"
       responses:
         "200":
           description: "New passport has been created successfully"
           schema:
-            $ref: "#/definitions/Person"
+            $ref: "#/definitions/PassportDto"
         "400":
           description: "Invalid input data"
-  /passport/{passportId}:
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid input data"
+        "404":
+          description: "Person is not found"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 404
+              "message": "Person is not found"
+        "422":
+          description: "Business validation error"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 422
+              "message": "Business validation error"
+  /passports/{passportId}:
     get:
       tags:
-        - "passport"
+        - "passports"
       summary: "Get passport by id"
       description: "Returns a passport by its id in the system"
       operationId: "getPassportById"
@@ -193,14 +283,26 @@ paths:
         "200":
           description: "Passport information has been returned successfully"
           schema:
-            $ref: "#/definitions/Passport"
+            $ref: "#/definitions/PassportWithPersonDto"
         "400":
           description: "Invalid ID"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid ID"
         "404":
           description: "Passport is not found"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 404
+              "message": "Passport is not found"
     put:
       tags:
-        - "passport"
+        - "passports"
       summary: "Update passport information by id"
       description: "Updates passport information using the provided data"
       operationId: "updatePassportById"
@@ -220,19 +322,39 @@ paths:
           description: "Passport object that will be used for updating information in the system"
           required: true
           schema:
-            $ref: "#/definitions/Passport"
+            $ref: "#/definitions/CreatePassportDto"
       responses:
         "200":
           description: "Passport information has been updated successfully"
           schema:
-            $ref: "#/definitions/Passport"
+            $ref: "#/definitions/PassportDto"
         "400":
           description: "Invalid ID"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid ID"
         "404":
           description: "Passport is not found"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 404
+              "message": "Passport is not found"
+        "422":
+          description: "Business validation error"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 422
+              "message": "Business validation error"
     delete:
       tags:
-        - "passport"
+        - "passports"
       summary: "Delete passport by id"
       description: "Deletes a passport by its id in the system"
       operationId: "deletePassportById"
@@ -244,18 +366,30 @@ paths:
           type: "integer"
           format: "int64"
       responses:
-        "200":
+        "204":
           description: "Passport information has been deleted successfully"
         "400":
           description: "Invalid ID"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid ID"
         "404":
           description: "Passport is not found"
-  /passport/{passportId}/deactivate:
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 404
+              "message": "Passport is not found"
+  /passports/{passportId}/deactivate:
     post:
       tags:
-        - "passport"
+        - "passports"
       summary: "Deactivate passport by id"
-      description: "Deactivates a passport using its id in the system by setting the isActive flag to false"
+      description: "Deactivates a passport using its id in the system by setting the status to Inactive"
       operationId: "deactivatePassportById"
       parameters:
         - name: "passportId"
@@ -265,32 +399,44 @@ paths:
           type: "integer"
           format: "int64"
       responses:
-        "200":
+        "204":
           description: "Passport has been deactivated successfully"
         "400":
           description: "Invalid ID"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid ID"
         "404":
           description: "Passport is not found"
-  /passport/findByGivenDateBetween:
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 404
+              "message": "Passport is not found"
+  /passports:
     get:
       tags:
-        - "passport"
-      summary: "Get passport by given dates range"
-      description: "Returns a passport usning the given dates range"
-      operationId: "getPassportByGivenDateRange"
+        - "passports"
+      summary: "Find passports using the values of the provided search parameter(s) or just return the list of all existing records"
+      description: "Returns passports matching the value of the provided search parameter(s) or the list of all existing records if no parameters are provided"
+      operationId: "searchPassport"
       produces:
         - "application/json"
       parameters:
         - name: "startDate"
           in: "query"
           description: "Start date of the dates range"
-          required: true
+          required: false
           type: "string"
           format: "date"
         - name: "endDate"
           in: "query"
           description: "End date of the dates range"
-          required: true
+          required: false
           type: "string"
           format: "date"
       responses:
@@ -299,17 +445,30 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/Passport"
+              $ref: "#/definitions/PassportDto"
         "400":
-          description: "Invalid dates range"
-        "404":
-          description: "Passports are not found in the given dates range"
+          description: "Invalid input data"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 400
+              "message": "Invalid parameters or their values are provided"
+        "422":
+          description: "Business validation error"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+          examples:
+            application/json:
+              "code": 422
+              "message": "Business validation error"
 definitions:
   Person:
     type: "object"
     required:
+      - "id"
       - "name"
-      - "birthday"
+      - "birthDate"
       - "birthCountry"
     properties:
       id:
@@ -323,24 +482,60 @@ definitions:
         type: "string"
         description: "Full name of the person"
         example: "Ivanov Ivan Ivanovich"
-      birthday:
+      birthDate:
         type: "string"
         format: "date"
-        description: "Birthday of the person"
+        description: "birthDate of the person"
         example: "21-06-1990"
       birthCountry:
         type: "string"
         description: "Country in which the person was born"
-        enum:
-          - "Russian Federation"
-          - "USA"
-          - "Canada"
-          - "Germany"
-          - "France"
+  PersonDto:
+    type: "object"
+    required:
+      - "id"
+      - "name"
+      - "birthDate"
+      - "birthCountry"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+        description: "Full name of the person"
+        example: "Ivanov Ivan Ivanovich"
+      birthDate:
+        type: "string"
+        format: "date"
+        description: "birthDate of the person"
+        example: "21-06-1990"
+      birthCountry:
+        type: "string"
+        description: "Country in which the person was born"
+  CreatePersonDto:
+    type: "object"
+    required:
+      - "name"
+      - "birthDate"
+      - "birthCountry"
+    properties:
+      name:
+        type: "string"
+        description: "Full name of the person"
+        example: "Ivanov Ivan Ivanovich"
+      birthDate:
+        type: "string"
+        format: "date"
+        description: "birthDate of the person"
+        example: "21-06-1990"
+      birthCountry:
+        type: "string"
+        description: "Country in which the person was born"
   Passport:
     type: "object"
     required:
-      - "number"
+      - "passportNumber"
       - "givenDate"
       - "departmentCode"
       - "person"
@@ -350,7 +545,7 @@ definitions:
         type: "integer"
         format: "int64"
       passportNumber:
-        type: "integer"
+        type: "string"
         description: "Passport number"
         example: "1234567890"
       givenDate:
@@ -368,8 +563,129 @@ definitions:
         enum:
           - "Internal"
           - "International"
-      isActive:
-        type: "boolean"
-        description: "Flag that determines whether the passport is active or not"
+      status:
+        type: "string"
+        description: "Passport status"
+        enum:
+          - "Active"
+          - "Inactive"
       person:
         $ref: "#/definitions/Person"
+  PassportDto:
+    type: "object"
+    required:
+      - "id"
+      - "passportNumber"
+      - "givenDate"
+      - "departmentCode"
+      - "passportType"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      passportNumber:
+        type: "string"
+        description: "Passport number"
+        example: "1234567890"
+      givenDate:
+        type: "string"
+        format: "date"
+        description: "Date on which the passport has been given to a person"
+        example: "21-06-1990"
+      departmentCode:
+        type: "string"
+        description: "Code of the department that issued the passport"
+        example: "111-111"
+      passportType:
+        type: "string"
+        description: "Passport type"
+        enum:
+          - "Internal"
+          - "International"
+      status:
+        type: "string"
+        description: "Passport status"
+        enum:
+          - "Active"
+          - "Inactive"
+  PassportWithPersonDto:
+    type: "object"
+    required:
+      - "id"
+      - "passportNumber"
+      - "givenDate"
+      - "departmentCode"
+      - "passportType"
+      - "person"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      passportNumber:
+        type: "string"
+        description: "Passport number"
+        example: "1234567890"
+      givenDate:
+        type: "string"
+        format: "date"
+        description: "Date on which the passport has been given to a person"
+        example: "21-06-1990"
+      departmentCode:
+        type: "string"
+        description: "Code of the department that issued the passport"
+        example: "111-111"
+      passportType:
+        type: "string"
+        description: "Passport type"
+        enum:
+          - "Internal"
+          - "International"
+      person:
+        $ref: "#/definitions/PersonDto"
+      status:
+        type: "string"
+        description: "Passport status"
+        enum:
+          - "Active"
+          - "Inactive"
+  CreatePassportDto:
+    type: "object"
+    required:
+      - "passportNumber"
+      - "givenDate"
+      - "departmentCode"
+      - "passportType"
+    properties:
+      passportNumber:
+        type: "string"
+        description: "Passport number"
+        example: "1234567890"
+      givenDate:
+        type: "string"
+        format: "date"
+        description: "Date on which the passport has been given to a person"
+        example: "21-06-1990"
+      departmentCode:
+        type: "string"
+        description: "Code of the department that issued the passport"
+        example: "111-111"
+      passportType:
+        type: "string"
+        description: "Passport type"
+        enum:
+          - "Internal"
+          - "International"
+      status:
+        type: "string"
+        description: "Passport status"
+        enum:
+          - "Active"
+          - "Inactive"
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"

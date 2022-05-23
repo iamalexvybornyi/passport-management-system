@@ -19,7 +19,6 @@ public class PassportWithPersonDto {
     private Long id;
 
     @NotNull
-//    @UniquePassportNumber
     @Size(min = 5, max = 20)
     private String passportNumber;
 

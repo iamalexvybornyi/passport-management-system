@@ -3,9 +3,7 @@ package com.iamalexvybornyi.passportmanagementsystem.dto.passport;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.PassportType;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Status;
-import com.iamalexvybornyi.passportmanagementsystem.validation.UniquePassportNumber;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -16,7 +14,6 @@ import java.time.LocalDate;
 public class CreatePassportDto {
 
     @NotNull
-//    @UniquePassportNumber
     @Size(min = 5, max = 20)
     private String passportNumber;
 

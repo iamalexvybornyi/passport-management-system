@@ -2,6 +2,8 @@ package com.iamalexvybornyi.passportmanagementsystem.model.passport;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import java.util.Arrays;
+
 public enum Status {
     ACTIVE,
     INACTIVE;
@@ -13,6 +15,8 @@ public enum Status {
                 return status;
             }
         }
-        return null;
+        throw new IllegalArgumentException(
+                String.format("'%s' is not a valid Passport Status, must be one of the following values: %s",
+                        value, Arrays.toString(Status.values())));
     }
 }

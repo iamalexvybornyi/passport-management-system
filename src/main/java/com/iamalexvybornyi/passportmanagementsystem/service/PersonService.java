@@ -77,6 +77,7 @@ public class PersonService {
     }
 
     public PassportDto addPersonPassport(Long id, CreatePassportDto createPassportDto) {
+        commonFieldValidationUtil.verifyCreatePassportDtoForBusinessRequirements(createPassportDto);
         Person personFromRepo = this.getPersonById(id);
         List<Passport> personPassports = personFromRepo.getPassports();
         if (personPassports == null) {

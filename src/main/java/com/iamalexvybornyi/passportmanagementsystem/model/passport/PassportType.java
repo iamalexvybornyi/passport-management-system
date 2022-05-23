@@ -2,6 +2,8 @@ package com.iamalexvybornyi.passportmanagementsystem.model.passport;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import java.util.Arrays;
+
 public enum PassportType {
     INTERNAL,
     INTERNATIONAL;
@@ -13,6 +15,8 @@ public enum PassportType {
                 return passportType;
             }
         }
-        return null;
+        throw new IllegalArgumentException(
+                String.format("'%s' is not a valid Passport Type, must be one of the following values: %s",
+                        value, Arrays.toString(PassportType.values())));
     }
 }

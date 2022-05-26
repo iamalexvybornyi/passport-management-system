@@ -32,16 +32,16 @@ paths:
           description: "Person object that needs to be added to the system"
           required: true
           schema:
-            $ref: "#/definitions/CreatePersonDto"
+            $ref: "#/definitions/CreatePersonRequest"
       responses:
         "200":
           description: "New person has been created successfully"
           schema:
-            $ref: "#/definitions/PersonDto"
+            $ref: "#/definitions/PersonResponse"
         "400":
           description: "Invalid input data"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -49,7 +49,7 @@ paths:
         "422":
           description: "Business validation error"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 422
@@ -74,11 +74,11 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/PersonDto"
+              $ref: "#/definitions/PersonResponse"
         "400":
           description: "Invalid input data"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -103,11 +103,11 @@ paths:
         "200":
           description: "Person information has been returned successfully"
           schema:
-            $ref: "#/definitions/PersonDto"
+            $ref: "#/definitions/PersonResponse"
         "400":
           description: "Invalid ID"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -115,7 +115,7 @@ paths:
         "404":
           description: "Person is not found"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 404
@@ -142,16 +142,16 @@ paths:
           description: "Person object that will be used for updating information in the system"
           required: true
           schema:
-            $ref: "#/definitions/CreatePersonDto"
+            $ref: "#/definitions/CreatePersonRequest"
       responses:
         "200":
           description: "Person information has been updated successfully"
           schema:
-            $ref: "#/definitions/PersonDto"
+            $ref: "#/definitions/PersonResponse"
         "400":
           description: "Invalid ID"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -159,7 +159,7 @@ paths:
         "404":
           description: "Person is not found"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 404
@@ -167,7 +167,7 @@ paths:
         "422":
           description: "Business validation error"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 422
@@ -188,17 +188,23 @@ paths:
           required: true
           type: "integer"
           format: "int64"
+        - name: "activeOnly"
+          in: "query"
+          description: "Flag for getting only active passports"
+          required: false
+          type: "boolean"
+          default: "false"
       responses:
         "200":
           description: "Passport information has been returned successfully"
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/PassportDto"
+              $ref: "#/definitions/PassportResponse"
         "400":
           description: "Invalid ID"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -206,7 +212,7 @@ paths:
         "404":
           description: "Person is not found"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 404
@@ -233,16 +239,16 @@ paths:
           description: "Passport object that needs to be added to the system"
           required: true
           schema:
-            $ref: "#/definitions/CreatePassportDto"
+            $ref: "#/definitions/CreatePassportRequest"
       responses:
         "200":
           description: "New passport has been created successfully"
           schema:
-            $ref: "#/definitions/PassportDto"
+            $ref: "#/definitions/PassportResponse"
         "400":
           description: "Invalid input data"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -250,7 +256,7 @@ paths:
         "404":
           description: "Person is not found"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 404
@@ -258,7 +264,7 @@ paths:
         "422":
           description: "Business validation error"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 422
@@ -283,11 +289,11 @@ paths:
         "200":
           description: "Passport information has been returned successfully"
           schema:
-            $ref: "#/definitions/PassportWithPersonDto"
+            $ref: "#/definitions/PassportWithPersonResponse"
         "400":
           description: "Invalid ID"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -295,7 +301,7 @@ paths:
         "404":
           description: "Passport is not found"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 404
@@ -322,16 +328,16 @@ paths:
           description: "Passport object that will be used for updating information in the system"
           required: true
           schema:
-            $ref: "#/definitions/CreatePassportDto"
+            $ref: "#/definitions/CreatePassportRequest"
       responses:
         "200":
           description: "Passport information has been updated successfully"
           schema:
-            $ref: "#/definitions/PassportDto"
+            $ref: "#/definitions/PassportResponse"
         "400":
           description: "Invalid ID"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -339,7 +345,7 @@ paths:
         "404":
           description: "Passport is not found"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 404
@@ -347,7 +353,7 @@ paths:
         "422":
           description: "Business validation error"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 422
@@ -371,7 +377,7 @@ paths:
         "400":
           description: "Invalid ID"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -379,7 +385,7 @@ paths:
         "404":
           description: "Passport is not found"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 404
@@ -404,7 +410,7 @@ paths:
         "400":
           description: "Invalid ID"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -412,7 +418,7 @@ paths:
         "404":
           description: "Passport is not found"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 404
@@ -445,11 +451,11 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/PassportDto"
+              $ref: "#/definitions/PassportResponse"
         "400":
           description: "Invalid input data"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 400
@@ -457,7 +463,7 @@ paths:
         "422":
           description: "Business validation error"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiError"
           examples:
             application/json:
               "code": 422
@@ -490,7 +496,7 @@ definitions:
       birthCountry:
         type: "string"
         description: "Country in which the person was born"
-  PersonDto:
+  PersonResponse:
     type: "object"
     required:
       - "id"
@@ -513,7 +519,7 @@ definitions:
       birthCountry:
         type: "string"
         description: "Country in which the person was born"
-  CreatePersonDto:
+  CreatePersonRequest:
     type: "object"
     required:
       - "name"
@@ -540,6 +546,7 @@ definitions:
       - "departmentCode"
       - "person"
       - "passportType"
+      - "status"
     properties:
       id:
         type: "integer"
@@ -571,7 +578,7 @@ definitions:
           - "Inactive"
       person:
         $ref: "#/definitions/Person"
-  PassportDto:
+  PassportResponse:
     type: "object"
     required:
       - "id"
@@ -608,7 +615,7 @@ definitions:
         enum:
           - "Active"
           - "Inactive"
-  PassportWithPersonDto:
+  PassportWithPersonResponse:
     type: "object"
     required:
       - "id"
@@ -641,14 +648,14 @@ definitions:
           - "Internal"
           - "International"
       person:
-        $ref: "#/definitions/PersonDto"
+        $ref: "#/definitions/PersonResponse"
       status:
         type: "string"
         description: "Passport status"
         enum:
           - "Active"
           - "Inactive"
-  CreatePassportDto:
+  CreatePassportRequest:
     type: "object"
     required:
       - "passportNumber"
@@ -681,7 +688,7 @@ definitions:
         enum:
           - "Active"
           - "Inactive"
-  ApiResponse:
+  ApiError:
     type: "object"
     properties:
       code:

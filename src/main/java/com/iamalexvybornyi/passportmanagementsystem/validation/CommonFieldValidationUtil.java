@@ -3,30 +3,41 @@ package com.iamalexvybornyi.passportmanagementsystem.validation;
 import com.iamalexvybornyi.passportmanagementsystem.dto.passport.CreatePassportDto;
 import com.iamalexvybornyi.passportmanagementsystem.dto.person.CreatePersonDto;
 import com.iamalexvybornyi.passportmanagementsystem.exception.BusinessValidationException;
+import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
 import com.iamalexvybornyi.passportmanagementsystem.repository.PassportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Component
 public class CommonFieldValidationUtil {
 
     private final PassportRepository passportRepository;
+    private final MessageSource messageSource;
 
     @Autowired
     public CommonFieldValidationUtil(
-            PassportRepository passportRepository
+            PassportRepository passportRepository,
+            MessageSource messageSource
     ) {
         this.passportRepository = passportRepository;
+        this.messageSource = messageSource;
     }
 
     public void verifyCreatePersonDtoForBusinessRequirements(CreatePersonDto createPersonDto) {
         Map<String, String> errors = new HashMap<>();
-        if (createPersonDto.getBirthDate().compareTo(LocalDate.now().minusYears(14)) >= 0) {
-            errors.put("birthDate", "Person can't be younger than 14 years old!");
+        if (LocalDate.parse(createPersonDto.getBirthDate(), DateTimeFormatter.ofPattern( "dd-MM-yyyy" ))
+                .compareTo(LocalDate.now().minusYears(14)) >= 0) {
+            errors.put("birthDate", messageSource.getMessage(
+                    "passport.management.system.constraints.birth.date.validation.message",
+                            null, Locale.ENGLISH));
         }
 
         if (errors.size() > 0) {
@@ -34,10 +45,13 @@ public class CommonFieldValidationUtil {
         }
     }
 
-    public void verifyCreatePassportDtoForBusinessRequirements(CreatePassportDto createPassportDto) {
+    public void verifyCreatePassportDtoForBusinessRequirements(Long passportId, CreatePassportDto createPassportDto) {
+        Passport foundPassport = passportRepository.findByPassportNumber(createPassportDto.getPassportNumber());
         Map<String, String> errors = new HashMap<>();
-        if (passportRepository.findByPassportNumber(createPassportDto.getPassportNumber()) != null) {
-            errors.put("passportNumber", "Passport number must be unique!");
+        if (foundPassport != null && !foundPassport.getId().equals(passportId)) {
+            errors.put("passportNumber", messageSource.getMessage(
+                    "passport.management.system.constraints.unique.passport.number.message",
+                    null, Locale.ENGLISH));
         }
 
         if (errors.size() > 0) {

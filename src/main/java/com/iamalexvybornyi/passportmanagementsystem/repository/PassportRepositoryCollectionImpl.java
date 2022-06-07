@@ -73,4 +73,17 @@ public class PassportRepositoryCollectionImpl implements PassportRepository {
         this.passports.remove(passport);
     }
 
+    @Override
+    public void deleteAll() {
+        Iterator<Passport> passportIterator = this.passports.iterator();
+        while (passportIterator.hasNext()) {
+            Passport passport = passportIterator.next();
+            Person person = personRepository.findByPassportNumber(passport.getPassportNumber());
+            if (person != null) {
+                personRepository.findById(person.getId()).getPassports().remove(passport);
+            }
+            passportIterator.remove();
+        }
+    }
+
 }

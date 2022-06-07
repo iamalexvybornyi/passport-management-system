@@ -8,13 +8,17 @@ import com.iamalexvybornyi.passportmanagementsystem.dto.passport.PassportWithPer
 import com.iamalexvybornyi.passportmanagementsystem.exception.RecordNotFoundException;
 import com.iamalexvybornyi.passportmanagementsystem.model.Person;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
+import com.iamalexvybornyi.passportmanagementsystem.model.passport.PassportType;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Status;
 import com.iamalexvybornyi.passportmanagementsystem.repository.PassportRepository;
 import com.iamalexvybornyi.passportmanagementsystem.repository.PersonRepository;
 import com.iamalexvybornyi.passportmanagementsystem.validation.CommonFieldValidationUtil;
+import lombok.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +45,8 @@ public class PassportService {
         this.commonFieldValidationUtil = commonFieldValidationUtil;
     }
 
-    public PassportWithPersonDto getPassport(Long id) {
+    @Nullable
+    public PassportWithPersonDto getPassport(@NonNull Long id) {
         Passport passportFromRepo = this.getPassportById(id);
         Person personFromRepo = personRepository.findByPassportNumber(passportFromRepo.getPassportNumber());
         PassportWithPersonDto passportWithPersonDto = passportConverter
@@ -51,12 +56,13 @@ public class PassportService {
     }
 
     public PassportDto updatePassport(Long id, CreatePassportDto createPassportDto) {
-        commonFieldValidationUtil.verifyCreatePassportDtoForBusinessRequirements(createPassportDto);
+        commonFieldValidationUtil.verifyCreatePassportDtoForBusinessRequirements(id, createPassportDto);
         Passport passportFromRepo = this.getPassportById(id);
-        passportFromRepo.setPassportType(createPassportDto.getPassportType());
+        passportFromRepo.setPassportType(PassportType.getPassportTypeFromString(createPassportDto.getPassportType()));
         passportFromRepo.setPassportNumber(createPassportDto.getPassportNumber());
-        passportFromRepo.setStatus(createPassportDto.getStatus());
-        passportFromRepo.setGivenDate(createPassportDto.getGivenDate());
+        passportFromRepo.setStatus(Status.getPassportStatusFromString(createPassportDto.getStatus()));
+        passportFromRepo.setGivenDate(LocalDate.parse(createPassportDto.getGivenDate(),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         passportFromRepo.setDepartmentCode(createPassportDto.getDepartmentCode());
         passportRepository.save(passportFromRepo);
         return passportConverter.passportToPassportDto(passportFromRepo);
@@ -76,6 +82,11 @@ public class PassportService {
     public List<PassportDto> getPassports(LocalDate startDate, LocalDate endDate) {
         Iterable<Passport> foundPassports;
         if (startDate != null || endDate != null) {
+            if (startDate != null && endDate != null) {
+                if (startDate.compareTo(endDate) > 0) {
+                    throw new RuntimeException("Start date can't be bigger than the end date!");
+                }
+            }
             foundPassports =
                     passportRepository.findByGivenDateBetween(startDate, endDate);
         } else {

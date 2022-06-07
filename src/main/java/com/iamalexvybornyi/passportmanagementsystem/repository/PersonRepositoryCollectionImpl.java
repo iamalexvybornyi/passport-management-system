@@ -52,4 +52,9 @@ public class PersonRepositoryCollectionImpl implements PersonRepository {
         this.persons.remove(person);
     }
 
+    @Override
+    public void deleteAll() {
+        this.persons.clear();
+    }
+
 }

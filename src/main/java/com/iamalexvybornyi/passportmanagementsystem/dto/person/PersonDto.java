@@ -1,13 +1,13 @@
 package com.iamalexvybornyi.passportmanagementsystem.dto.person;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.iamalexvybornyi.passportmanagementsystem.validation.ValidBirthDate;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.time.LocalDate;
 
+@EqualsAndHashCode
 @Data
 public class PersonDto {
 
@@ -19,12 +19,10 @@ public class PersonDto {
     private String name;
 
     @NotNull
-//    @ValidBirthDate
-    @JsonFormat(pattern="dd-MM-yyyy")
-    private LocalDate birthDate;
+    @Pattern(regexp = "\\d{2}-\\d{2}-\\d{4}", message = "{passport.management.system.constraints.birth.date.format.message}")
+    private String birthDate;
 
     @NotNull
     @Size(min = 2, max = 50)
     private String birthCountry;
-
 }

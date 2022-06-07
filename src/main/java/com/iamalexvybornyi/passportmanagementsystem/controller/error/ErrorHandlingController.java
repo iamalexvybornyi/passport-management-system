@@ -49,7 +49,7 @@ public class ErrorHandlingController {
     @ExceptionHandler({RuntimeException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     private ApiError handleRuntimeException(RuntimeException exception, HttpServletRequest request) {
-        return new ApiError(HttpStatus.BAD_REQUEST.value(), exception.getCause().getCause().getMessage(),
+        return new ApiError(HttpStatus.BAD_REQUEST.value(), "Invalid input data",
                 request.getServletPath());
     }
 }

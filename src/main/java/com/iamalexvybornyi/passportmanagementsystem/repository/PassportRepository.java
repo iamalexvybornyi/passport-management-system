@@ -18,4 +18,6 @@ public interface PassportRepository {
 
     void delete(Passport passport);
 
+    void deleteAll();
+
 }

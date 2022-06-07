@@ -13,4 +13,6 @@ public interface PersonRepository {
     Person findByPassportNumber(String passportNumber);
 
     void delete(Person person);
+
+    void deleteAll();
 }

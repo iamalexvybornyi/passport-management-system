@@ -60,7 +60,7 @@ public class PersonController extends ErrorHandlingController {
 
     @GetMapping("/{id}/passports")
     @ResponseStatus(HttpStatus.OK)
-    public List<PassportDto> getPersonPassports(@PathVariable("id") Long id) {
-        return personService.getPersonPassports(id);
+    public List<PassportDto> getPersonPassports(@PathVariable("id") Long id, @Param("activeOnly") boolean activeOnly) {
+        return personService.getPersonPassports(id, activeOnly);
     }
 }

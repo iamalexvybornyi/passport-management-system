@@ -10,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class PassportController extends ErrorHandlingController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public PassportDto updatePassport(@PathVariable Long id, @RequestBody CreatePassportDto createPassportDto) {
+    public PassportDto updatePassport(@PathVariable Long id, @Valid @RequestBody CreatePassportDto createPassportDto) {
         return passportService.updatePassport(id, createPassportDto);
     }
 

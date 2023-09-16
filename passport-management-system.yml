@@ -104,14 +104,6 @@ paths:
           description: "Person information has been returned successfully"
           schema:
             $ref: "#/definitions/PersonResponse"
-        "400":
-          description: "Invalid ID"
-          schema:
-            $ref: "#/definitions/ApiError"
-          examples:
-            application/json:
-              "code": 400
-              "message": "Invalid ID"
         "404":
           description: "Person is not found"
           schema:
@@ -148,14 +140,6 @@ paths:
           description: "Person information has been updated successfully"
           schema:
             $ref: "#/definitions/PersonResponse"
-        "400":
-          description: "Invalid ID"
-          schema:
-            $ref: "#/definitions/ApiError"
-          examples:
-            application/json:
-              "code": 400
-              "message": "Invalid ID"
         "404":
           description: "Person is not found"
           schema:
@@ -188,12 +172,15 @@ paths:
           required: true
           type: "integer"
           format: "int64"
-        - name: "activeOnly"
+        - name: "status"
           in: "query"
-          description: "Flag for getting only active passports"
+          description: "Status parameter for getting only active/inactive passports"
           required: false
-          type: "boolean"
-          default: "false"
+          type: "string"
+          enum:
+            - "ACTIVE"
+            - "INACTIVE"
+          default: "ACTIVE"
       responses:
         "200":
           description: "Passport information has been returned successfully"
@@ -201,14 +188,6 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/PassportResponse"
-        "400":
-          description: "Invalid ID"
-          schema:
-            $ref: "#/definitions/ApiError"
-          examples:
-            application/json:
-              "code": 400
-              "message": "Invalid ID"
         "404":
           description: "Person is not found"
           schema:
@@ -290,14 +269,6 @@ paths:
           description: "Passport information has been returned successfully"
           schema:
             $ref: "#/definitions/PassportWithPersonResponse"
-        "400":
-          description: "Invalid ID"
-          schema:
-            $ref: "#/definitions/ApiError"
-          examples:
-            application/json:
-              "code": 400
-              "message": "Invalid ID"
         "404":
           description: "Passport is not found"
           schema:
@@ -334,14 +305,6 @@ paths:
           description: "Passport information has been updated successfully"
           schema:
             $ref: "#/definitions/PassportResponse"
-        "400":
-          description: "Invalid ID"
-          schema:
-            $ref: "#/definitions/ApiError"
-          examples:
-            application/json:
-              "code": 400
-              "message": "Invalid ID"
         "404":
           description: "Passport is not found"
           schema:
@@ -374,14 +337,6 @@ paths:
       responses:
         "204":
           description: "Passport information has been deleted successfully"
-        "400":
-          description: "Invalid ID"
-          schema:
-            $ref: "#/definitions/ApiError"
-          examples:
-            application/json:
-              "code": 400
-              "message": "Invalid ID"
         "404":
           description: "Passport is not found"
           schema:
@@ -407,14 +362,6 @@ paths:
       responses:
         "204":
           description: "Passport has been deactivated successfully"
-        "400":
-          description: "Invalid ID"
-          schema:
-            $ref: "#/definitions/ApiError"
-          examples:
-            application/json:
-              "code": 400
-              "message": "Invalid ID"
         "404":
           description: "Passport is not found"
           schema:

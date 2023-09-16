@@ -15,7 +15,7 @@
     <name>passport-management-system</name>
     <description>passport-management-system</description>
     <properties>
-        <java.version>18</java.version>
+        <java.version>17</java.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
     </properties>
     <dependencies>

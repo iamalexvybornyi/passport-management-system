@@ -7,22 +7,23 @@ import com.iamalexvybornyi.passportmanagementsystem.model.passport.Status;
 import com.iamalexvybornyi.passportmanagementsystem.service.PassportService;
 import com.iamalexvybornyi.passportmanagementsystem.service.PersonService;
 import io.restassured.response.Response;
+import lombok.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PersonControllerGetPassportsTest extends BaseTest {
 
-    private PersonService personService;
-    private PassportService passportService;
+    @NonNull
+    private final PersonService personService;
+    @NonNull
+    private final PassportService passportService;
 
     @Autowired
     public PersonControllerGetPassportsTest(
@@ -35,110 +36,111 @@ public class PersonControllerGetPassportsTest extends BaseTest {
 
     @BeforeEach
     public void createValidPerson() {
-        Person person = new Person();
+        final Person person = new Person();
+        person.setId(idGeneratorUtil.generatePersonId());
         person.setName("Some Name");
         person.setBirthCountry("Country");
         person.setBirthDate(LocalDate.of(1990, 1, 1));
         personRepository.save(person);
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.INACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.INACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.INACTIVE));
     }
 
     @Test
     public void getPassports_whenPassportsExist_receiveOk() {
-        Person person = personRepository.findAll().iterator().next();
-        Response response = getPassportsFromPassportEndpointByPersonId(person.getId());
+        final Person person = personRepository.findAll().iterator().next();
+        final Response response = getPassportsFromPassportEndpointByPersonId(person.getId());
         verifyResponseStatusCode(response, HttpStatus.OK.value());
     }
 
     @Test
     public void getPassports_whenPassportsExist_receiveExpectedPassports() {
-        Person person = personRepository.findAll().iterator().next();
-        List<PassportDto> expectedListOfPassports = new ArrayList<>();
-        person.getPassports().forEach(passport ->
+        final Person person = personRepository.findAll().iterator().next();
+        final List<PassportDto> expectedListOfPassports = new ArrayList<>();
+        person.getPassports()
+                .stream().filter(passport -> passport.getStatus().equals(Status.ACTIVE))
+                .forEach(passport ->
                 expectedListOfPassports.add(passportConverter.passportToPassportDto(passport)));
-        Response response = getPassportsFromPassportEndpointByPersonId(person.getId());
-        List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
+        final Response response = getPassportsFromPassportEndpointByPersonId(person.getId());
+        final List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
         assertThat(actualListOfPassports).isEqualTo(expectedListOfPassports);
     }
 
     @Test
     public void getPassports_whenPassportsDoNotExist_receiveOk() {
         passportRepository.deleteAll();
-        Person person = personRepository.findAll().iterator().next();
-        Response response = getPassportsFromPassportEndpointByPersonId(person.getId());
+        final Person person = personRepository.findAll().iterator().next();
+        final Response response = getPassportsFromPassportEndpointByPersonId(person.getId());
         verifyResponseStatusCode(response, HttpStatus.OK.value());
     }
 
     @Test
     public void getPassports_whenPassportsDoNotExist_receiveExpectedPassports() {
         passportRepository.deleteAll();
-        Person person = personRepository.findAll().iterator().next();
-        List<PassportDto> expectedListOfPassports = new ArrayList<>();
+        final Person person = personRepository.findAll().iterator().next();
+        final List<PassportDto> expectedListOfPassports = new ArrayList<>();
         person.getPassports().forEach(passport ->
                 expectedListOfPassports.add(passportConverter.passportToPassportDto(passport)));
-        Response response = getPassportsFromPassportEndpointByPersonId(person.getId());
-        List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
+        final Response response = getPassportsFromPassportEndpointByPersonId(person.getId());
+        final List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
         assertThat(actualListOfPassports).isEqualTo(expectedListOfPassports);
     }
 
     @Test
-    public void getPassports_whenPassportsExistAndActiveOnlyFlagIsFalse_receiveOk() {
-        Person person = personRepository.findAll().iterator().next();
-        Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "activeOnly=false");
+    public void getPassports_whenPassportsExistAndStatusIsInactive_receiveOk() {
+        final Person person = personRepository.findAll().iterator().next();
+        final Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "status=INACTIVE");
         verifyResponseStatusCode(response, HttpStatus.OK.value());
     }
 
     @Test
-    public void getPassports_whenPassportsExistAndActiveOnlyFlagIsFalse_receiveExpectedPassports() {
-        Person person = personRepository.findAll().iterator().next();
-        List<PassportDto> expectedListOfPassports = new ArrayList<>();
-        person.getPassports().forEach(passport ->
-                expectedListOfPassports.add(passportConverter.passportToPassportDto(passport)));
-        Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "activeOnly=false");
-        List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
+    public void getPassports_whenPassportsExistAndStatusIsInactive_receiveExpectedPassports() {
+        final Person person = personRepository.findAll().iterator().next();
+        final List<PassportDto> expectedListOfPassports = new ArrayList<>();
+        person.getPassports().stream().filter(passport -> passport.getStatus().equals(Status.INACTIVE))
+                .forEach(passport -> expectedListOfPassports.add(passportConverter.passportToPassportDto(passport)));
+        final Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "status=INACTIVE");
+        final List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
         assertThat(actualListOfPassports).isEqualTo(expectedListOfPassports);
     }
 
     @Test
-    public void getPassports_whenPassportsExistAndActiveOnlyFlagIsTrue_receiveOk() {
-        Person person = personRepository.findAll().iterator().next();
-        Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "activeOnly=true");
+    public void getPassports_whenPassportsExistAndStatusIsActive_receiveOk() {
+        final Person person = personRepository.findAll().iterator().next();
+        final Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "status=ACTIVE");
         verifyResponseStatusCode(response, HttpStatus.OK.value());
     }
 
     @Test
-    public void getPassports_whenPassportsExistAndActiveOnlyFlagIsTrue_receiveExpectedPassports() {
-        Person person = personRepository.findAll().iterator().next();
-        passportService.deactivatePassport(person.getPassports().stream().findAny().orElse(null).getId());
-        List<PassportDto> expectedListOfPassports = new ArrayList<>();
+    public void getPassports_whenPassportsExistAndStatusIsActive_receiveExpectedPassports() {
+        final Person person = personRepository.findAll().iterator().next();
+        passportService.deactivatePassport(
+                Objects.requireNonNull(person.getPassports().stream().findAny().orElse(null)).getId());
+        final List<PassportDto> expectedListOfPassports = new ArrayList<>();
         person.getPassports().forEach(passport -> {
             if (passport.getStatus().equals(Status.ACTIVE)) {
                 expectedListOfPassports.add(passportConverter.passportToPassportDto(passport));
             }
         });
-        Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "activeOnly=true");
-        List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
+        final Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "status=ACTIVE");
+        final List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
         assertThat(actualListOfPassports).isEqualTo(expectedListOfPassports);
     }
 
     @Test
-    public void getPassports_whenActiveOnlyFlagValueIsInvalid_receiveBadRequest() {
-        Person person = personRepository.findAll().iterator().next();
-        Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "activeOnly=invalid_value");
+    public void getPassports_whenStatusIsInvalid_receiveBadRequest() {
+        final Person person = personRepository.findAll().iterator().next();
+        final Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "status=invalid_value");
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void getPassports_whenPersonIdDoesNotExistButIsValid_receiveNotFound() {
-        Response response = getPassportsFromPassportEndpointByPersonId(0L);
+        final Response response = getPassportsFromPassportEndpointByPersonId(NON_EXISTING_ID);
         verifyResponseStatusCode(response, HttpStatus.NOT_FOUND.value());
-    }
-
-    @Test
-    public void getPassports_whenPersonIdIsNotValid_receiveBadRequest() {
-        Response response = getPassportsFromPassportEndpointByPersonId("invalid_id");
-        verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 }

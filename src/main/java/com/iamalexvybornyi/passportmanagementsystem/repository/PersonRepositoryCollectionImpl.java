@@ -2,6 +2,8 @@ package com.iamalexvybornyi.passportmanagementsystem.repository;
 
 import com.iamalexvybornyi.passportmanagementsystem.model.Person;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
+import lombok.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashSet;
@@ -11,16 +13,19 @@ import java.util.Set;
 @Repository
 public class PersonRepositoryCollectionImpl implements PersonRepository {
 
-    Set<Person> persons = new HashSet<>();
+    @NonNull
+    private final Set<Person> persons = new HashSet<>();
 
     @Override
-    public Person save(Person person) {
+    @NonNull
+    public Person save(@NonNull Person person) {
         persons.add(person);
         return person;
     }
 
     @Override
-    public Person findById(Long id) {
+    @Nullable
+    public Person findById(@NonNull String id) {
         return this.persons.stream()
                 .filter(person -> person.getId().equals(id))
                 .findFirst()
@@ -28,6 +33,7 @@ public class PersonRepositoryCollectionImpl implements PersonRepository {
     }
 
     @Override
+    @NonNull
     public Iterable<Person> findAll() {
         return this.persons;
     }
@@ -48,7 +54,7 @@ public class PersonRepositoryCollectionImpl implements PersonRepository {
     }
 
     @Override
-    public void delete(Person person) {
+    public void delete(@NonNull Person person) {
         this.persons.remove(person);
     }
 

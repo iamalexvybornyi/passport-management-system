@@ -12,50 +12,51 @@ import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Status;
 import com.iamalexvybornyi.passportmanagementsystem.repository.PassportRepository;
 import com.iamalexvybornyi.passportmanagementsystem.repository.PersonRepository;
+import com.iamalexvybornyi.passportmanagementsystem.util.IdGeneratorUtil;
 import com.iamalexvybornyi.passportmanagementsystem.validation.CommonFieldValidationUtil;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class PersonService {
 
+    @NonNull
     private final PersonRepository personRepository;
+    @NonNull
     private final PassportRepository passportRepository;
+    @NonNull
     private final PersonConverter personConverter;
+    @NonNull
     private final PassportConverter passportConverter;
+    @NonNull
     private final CommonFieldValidationUtil commonFieldValidationUtil;
+    @NonNull
+    private final IdGeneratorUtil idGeneratorUtil;
 
-    public PersonService(
-            PersonRepository personRepository,
-            PassportRepository passportRepository,
-            PersonConverter personConverter,
-            PassportConverter passportConverter,
-            CommonFieldValidationUtil commonFieldValidationUtil
-    ) {
-        this.personRepository = personRepository;
-        this.passportRepository = passportRepository;
-        this.personConverter = personConverter;
-        this.passportConverter = passportConverter;
-        this.commonFieldValidationUtil = commonFieldValidationUtil;
-    }
-
-    public PersonDto addPerson(CreatePersonDto createPersonDto) {
+    @NonNull
+    public PersonDto addPerson(@NonNull CreatePersonDto createPersonDto) {
         commonFieldValidationUtil.verifyCreatePersonDtoForBusinessRequirements(createPersonDto);
-        Person person = personConverter.createPersonDtoToPerson(createPersonDto);
+        final Person person = personConverter.createPersonDtoToPerson(createPersonDto);
+        person.setId(idGeneratorUtil.generatePersonId());
         personRepository.save(person);
         return personConverter.personToPersonDto(person);
     }
 
-    public List<PersonDto> getPersons(String passportNumber) {
-        List<PersonDto> personDtoList = new ArrayList<>();
+    @NonNull
+    public List<PersonDto> getPersons(@Nullable String passportNumber) {
+        final List<PersonDto> personDtoList = new ArrayList<>();
         if (passportNumber != null && !passportNumber.isEmpty()) {
-            PersonDto personDto =
-                    personConverter.personToPersonDto(personRepository.findByPassportNumber(passportNumber));
+            final PersonDto personDto = personConverter.personToPersonDto(personRepository.findByPassportNumber(passportNumber));
             if (personDto != null) {
                 personDtoList.add(personDto);
             }
@@ -65,31 +66,33 @@ public class PersonService {
         return personDtoList;
     }
 
-    public PersonDto getPerson(Long id) {
-        Person personFromRepo = this.getPersonById(id);
+    public PersonDto getPerson(@NonNull String id) {
+        final Person personFromRepo = this.getPersonById(id);
         return personConverter.personToPersonDto(personFromRepo);
     }
 
-    public PersonDto updatePerson(Long id, CreatePersonDto createPersonDto) {
+    @NonNull
+    public PersonDto updatePerson(@NonNull String id, @NonNull CreatePersonDto createPersonDto) {
         commonFieldValidationUtil.verifyCreatePersonDtoForBusinessRequirements(createPersonDto);
-        Person personFromRepo = this.getPersonById(id);
+        final Person personFromRepo = this.getPersonById(id);
         personFromRepo.setName(createPersonDto.getName());
         personFromRepo.setBirthCountry(createPersonDto.getBirthCountry());
-        personFromRepo.setBirthDate(LocalDate.parse(createPersonDto.getBirthDate(),
-                DateTimeFormatter.ofPattern( "dd-MM-yyyy" )));
+        personFromRepo.setBirthDate(LocalDate.parse(createPersonDto.getBirthDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         personRepository.save(personFromRepo);
         return personConverter.personToPersonDto(personFromRepo);
     }
 
-    public PassportDto addPersonPassport(Long id, CreatePassportDto createPassportDto) {
+    @NonNull
+    public PassportDto addPersonPassport(@NonNull String id, @NonNull CreatePassportDto createPassportDto) {
         commonFieldValidationUtil.verifyCreatePassportDtoForBusinessRequirements(null, createPassportDto);
-        Person personFromRepo = this.getPersonById(id);
+        final Person personFromRepo = this.getPersonById(id);
         List<Passport> personPassports = personFromRepo.getPassports();
         if (personPassports == null) {
             personPassports = new ArrayList<>();
         }
 
-        Passport passport = passportConverter.createPassportDtoToPassport(createPassportDto);
+        final Passport passport = passportConverter.createPassportDtoToPassport(createPassportDto);
+        passport.setId(idGeneratorUtil.generatePassportId());
         passportRepository.save(passport);
 
         personPassports.add(passport);
@@ -98,22 +101,22 @@ public class PersonService {
         return passportConverter.passportToPassportDto(passport);
     }
 
-    public List<PassportDto> getPersonPassports(Long id, boolean activeOnly) {
-        List<PassportDto> personPassportList = new ArrayList<>();
-        List<PassportDto> resultPersonPassportList = personPassportList;
-        Person personFromRepo = this.getPersonById(id);
-        personFromRepo.getPassports()
-                .forEach(passport -> personPassportList.add(passportConverter.passportToPassportDto(passport)));
-        if (activeOnly) {
-            resultPersonPassportList = personPassportList.stream()
-                    .filter(passportDto -> passportDto.getStatus().equals(Status.ACTIVE.toString()))
-                    .collect(Collectors.toList());
-        }
-        return resultPersonPassportList;
+    @NonNull
+    public List<PassportDto> getPersonPassports(@NonNull String id, @Nullable Status status) {
+        final List<PassportDto> personPassportList = new ArrayList<>();
+        final Person personFromRepo = this.getPersonById(id);
+        personFromRepo.getPassports().forEach(passport ->
+                personPassportList.add(passportConverter.passportToPassportDto(passport)));
+        return personPassportList.stream()
+                .filter(passportDto ->
+                        passportDto
+                                .getStatus()
+                                .equals(Optional.ofNullable(status).orElse(Status.ACTIVE).toString()))
+                .collect(Collectors.toList());
     }
 
-    private Person getPersonById(Long id) {
-        Person personFromRepo = personRepository.findById(id);
+    private Person getPersonById(@NonNull String id) {
+        final Person personFromRepo = personRepository.findById(id);
         if (personFromRepo == null) {
             throw new RecordNotFoundException("Person is not found!");
         }

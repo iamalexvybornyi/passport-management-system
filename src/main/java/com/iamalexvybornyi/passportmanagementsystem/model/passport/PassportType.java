@@ -1,6 +1,7 @@
 package com.iamalexvybornyi.passportmanagementsystem.model.passport;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import lombok.NonNull;
 
 import java.util.Arrays;
 
@@ -8,8 +9,9 @@ public enum PassportType {
     INTERNAL,
     INTERNATIONAL;
 
+    @NonNull
     @JsonCreator
-    public static PassportType getPassportTypeFromString(String value) {
+    public static PassportType getPassportTypeFromString(@NonNull String value) {
         for (PassportType passportType : PassportType.values()) {
             if (passportType.toString().equalsIgnoreCase(value)) {
                 return passportType;

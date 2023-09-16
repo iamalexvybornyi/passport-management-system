@@ -25,51 +25,52 @@ public class PassportControllerUpdatePassportTest extends BaseTest {
 
     @BeforeEach
     public void createValidPerson() {
-        Person person = new Person();
+        final Person person = new Person();
+        person.setId(idGeneratorUtil.generatePersonId());
         person.setName("Some Name");
         person.setBirthCountry("Country");
         person.setBirthDate(LocalDate.of(1990, 1, 1));
         personRepository.save(person);
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
     }
 
     @Test
     public void updatePassport_whenPassportIsValid_receiveOk() {
-        Passport passport = passportRepository.findAll().iterator().next();
-        CreatePassportDto createPassportDto = passportConverter.passportToCreatePassportDto(passport);
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final CreatePassportDto createPassportDto = passportConverter.passportToCreatePassportDto(passport);
         createPassportDto.setPassportNumber(RandomStringUtils.randomAlphanumeric(10));
-        Response response = sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(), createPassportDto);
+        final Response response = sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(), createPassportDto);
         verifyResponseStatusCode(response, HttpStatus.OK.value());
     }
 
     @Test
     public void updatePassport_whenPassportIsValid_receiveCorrectPassportDto() {
-        Passport passport = passportRepository.findAll().iterator().next();
-        CreatePassportDto createPassportDto = passportConverter.passportToCreatePassportDto(passport);
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final CreatePassportDto createPassportDto = passportConverter.passportToCreatePassportDto(passport);
         createPassportDto.setPassportNumber(RandomStringUtils.randomAlphanumeric(10));
         createPassportDto.setPassportType(PassportType.INTERNAL.toString());
         createPassportDto.setDepartmentCode("222-222");
         createPassportDto.setStatus(Status.INACTIVE.toString());
         createPassportDto.setGivenDate(LocalDate.now().minusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-        Response response = sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(), createPassportDto);
-        PassportDto actualPassport = extractDataFromResponse(response, PassportDto.class);
-        PassportDto expectedPassport = passportConverter.passportToPassportDto(passportRepository.findById(passport.getId()));
+        final Response response = sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(), createPassportDto);
+        final PassportDto actualPassport = extractDataFromResponse(response, PassportDto.class);
+        final PassportDto expectedPassport = passportConverter.passportToPassportDto(passportRepository.findById(passport.getId()));
         assertThat(actualPassport).isEqualTo(expectedPassport);
     }
 
     // Passport Number
     @Test
     public void updatePassport_whenPassportNumberHasLessCharsThanRequired_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
+        final Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
                 RandomStringUtils.randomAlphanumeric(4));
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenPassportNumberHasLessCharsThanRequired_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
+        final Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
                 RandomStringUtils.randomAlphanumeric(4));
         extractAndVerifyApiErrorResponseForField(response, "passportNumber",
                 "size must be between 5 and 20");
@@ -77,14 +78,14 @@ public class PassportControllerUpdatePassportTest extends BaseTest {
 
     @Test
     public void updatePassport_whenPassportNumberHasMoreCharsThanRequired_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
+        final Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
                 RandomStringUtils.randomAlphanumeric(21));
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenPassportNumberHasMoreCharsThanRequired_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
+        final Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
                 RandomStringUtils.randomAlphanumeric(21));
         extractAndVerifyApiErrorResponseForField(response, "passportNumber",
                 "size must be between 5 and 20");
@@ -92,38 +93,38 @@ public class PassportControllerUpdatePassportTest extends BaseTest {
 
     @Test
     public void updatePassport_whenPassportNumberIsNull_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(null);
+        final Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(null);
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenPassportNumberIsNull_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(null);
+        final Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(null);
         extractAndVerifyApiErrorResponseForField(response, "passportNumber", "must not be null");
     }
 
     @Test
     public void updatePassport_whenPassportNumberIsNotUnique_receiveUnprocessableEntity() {
-        Iterator<Passport> passportIterator = passportRepository.findAll().iterator();
+        final Iterator<Passport> passportIterator = passportRepository.findAll().iterator();
         passportIterator.next();
-        Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
+        final Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
                 passportIterator.next().getPassportNumber());
         verifyResponseStatusCode(response, HttpStatus.UNPROCESSABLE_ENTITY.value());
     }
 
     @Test
     public void updatePassport_whenPassportNumberIsNotUnique_receiveRelatedMessage() {
-        Iterator<Passport> passportIterator = passportRepository.findAll().iterator();
+        final Iterator<Passport> passportIterator = passportRepository.findAll().iterator();
         passportIterator.next();
-        Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
+        final Response response = this.findPassportAndSetItsNumberAndAttemptToUpdatePassport(
                 passportIterator.next().getPassportNumber());
         extractAndVerifyApiErrorResponseForField(response, "passportNumber",
                 propertyReaderUtil.getUniquePassportValidationMessage());
     }
 
     private Response findPassportAndSetItsNumberAndAttemptToUpdatePassport(String passportNumberValue) {
-        Passport passport = passportRepository.findAll().iterator().next();
-        CreatePassportDto passportForRequest = passportConverter.passportToCreatePassportDto(passport);
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final CreatePassportDto passportForRequest = passportConverter.passportToCreatePassportDto(passport);
         passportForRequest.setPassportNumber(passportNumberValue);
         return sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(), passportForRequest);
     }
@@ -131,32 +132,32 @@ public class PassportControllerUpdatePassportTest extends BaseTest {
     // Given date
     @Test
     public void updatePassport_whenGivenDateHasInvalidFormat_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsGivenDateAndAttemptToUpdatePassport("11-11-199");
+        final Response response = this.findPassportAndSetItsGivenDateAndAttemptToUpdatePassport("11-11-199");
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenGivenDateHasInvalidFormat_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsGivenDateAndAttemptToUpdatePassport("11-11-199");
+        final Response response = this.findPassportAndSetItsGivenDateAndAttemptToUpdatePassport("11-11-199");
         extractAndVerifyApiErrorResponseForField(response, "givenDate",
                 propertyReaderUtil.getGivenDateValidationMessage());
     }
 
     @Test
     public void updatePassport_whenGivenDateIsNull_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsGivenDateAndAttemptToUpdatePassport(null);
+        final Response response = this.findPassportAndSetItsGivenDateAndAttemptToUpdatePassport(null);
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenGivenDateIsNull_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsGivenDateAndAttemptToUpdatePassport(null);
+        final Response response = this.findPassportAndSetItsGivenDateAndAttemptToUpdatePassport(null);
         extractAndVerifyApiErrorResponseForField(response, "givenDate", "must not be null");
     }
 
     private Response findPassportAndSetItsGivenDateAndAttemptToUpdatePassport(String givenDate) {
-        Passport passport = passportRepository.findAll().iterator().next();
-        CreatePassportDto passportForRequest = passportConverter.passportToCreatePassportDto(passport);
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final CreatePassportDto passportForRequest = passportConverter.passportToCreatePassportDto(passport);
         passportForRequest.setGivenDate(givenDate);
         return sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(), passportForRequest);
     }
@@ -164,32 +165,32 @@ public class PassportControllerUpdatePassportTest extends BaseTest {
     // Department code
     @Test
     public void updatePassport_whenDepartmentCodeHasInvalidFormat_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsDepartmentCodeAndAttemptToUpdatePassport("111-22");
+        final Response response = this.findPassportAndSetItsDepartmentCodeAndAttemptToUpdatePassport("111-22");
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenDepartmentCodeHasInvalidFormat_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsDepartmentCodeAndAttemptToUpdatePassport("111-22");
+        final Response response = this.findPassportAndSetItsDepartmentCodeAndAttemptToUpdatePassport("111-22");
         extractAndVerifyApiErrorResponseForField(response, "departmentCode",
                 propertyReaderUtil.getDepartmentCodeValidationMessage());
     }
 
     @Test
     public void updatePassport_whenDepartmentCodeIsNull_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsDepartmentCodeAndAttemptToUpdatePassport(null);
+        final Response response = this.findPassportAndSetItsDepartmentCodeAndAttemptToUpdatePassport(null);
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenDepartmentCodeIsNull_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsDepartmentCodeAndAttemptToUpdatePassport(null);
+        final Response response = this.findPassportAndSetItsDepartmentCodeAndAttemptToUpdatePassport(null);
         extractAndVerifyApiErrorResponseForField(response, "departmentCode", "must not be null");
     }
 
     private Response findPassportAndSetItsDepartmentCodeAndAttemptToUpdatePassport(String departmentCode) {
-        Passport passport = passportRepository.findAll().iterator().next();
-        CreatePassportDto passportForRequest = passportConverter.passportToCreatePassportDto(passport);
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final CreatePassportDto passportForRequest = passportConverter.passportToCreatePassportDto(passport);
         passportForRequest.setDepartmentCode(departmentCode);
         return sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(), passportForRequest);
     }
@@ -197,32 +198,32 @@ public class PassportControllerUpdatePassportTest extends BaseTest {
     // Passport Type
     @Test
     public void updatePassport_whenPassportTypeHasInvalidValue_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsTypeAndAttemptToUpdatePassport("INVALID_STATUS");
+        final Response response = this.findPassportAndSetItsTypeAndAttemptToUpdatePassport("INVALID_STATUS");
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenPassportTypeHasInvalidValue_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsTypeAndAttemptToUpdatePassport("INVALID_STATUS");
+        final Response response = this.findPassportAndSetItsTypeAndAttemptToUpdatePassport("INVALID_STATUS");
         extractAndVerifyApiErrorResponseForField(response, "passportType",
                 propertyReaderUtil.getPassportTypeValidationMessage());
     }
 
     @Test
     public void updatePassport_whenPassportTypeIsNull_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsTypeAndAttemptToUpdatePassport(null);
+        final Response response = this.findPassportAndSetItsTypeAndAttemptToUpdatePassport(null);
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenPassportTypeIsNull_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsTypeAndAttemptToUpdatePassport(null);
+        final Response response = this.findPassportAndSetItsTypeAndAttemptToUpdatePassport(null);
         extractAndVerifyApiErrorResponseForField(response, "passportType", "must not be null");
     }
 
     private Response findPassportAndSetItsTypeAndAttemptToUpdatePassport(String passportType) {
-        Passport passport = passportRepository.findAll().iterator().next();
-        CreatePassportDto passportForRequest = passportConverter.passportToCreatePassportDto(passport);
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final CreatePassportDto passportForRequest = passportConverter.passportToCreatePassportDto(passport);
         passportForRequest.setPassportType(passportType);
         return sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(), passportForRequest);
     }
@@ -230,32 +231,32 @@ public class PassportControllerUpdatePassportTest extends BaseTest {
     // Passport Type
     @Test
     public void updatePassport_whenPassportStatusHasInvalidValue_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsStatusAndAttemptToUpdatePassport("INVALID_STATUS");
+        final Response response = this.findPassportAndSetItsStatusAndAttemptToUpdatePassport("INVALID_STATUS");
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenPassportStatusHasInvalidValue_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsStatusAndAttemptToUpdatePassport("INVALID_STATUS");
+        final Response response = this.findPassportAndSetItsStatusAndAttemptToUpdatePassport("INVALID_STATUS");
         extractAndVerifyApiErrorResponseForField(response, "status",
                 propertyReaderUtil.getPassportStatusValidationMessage());
     }
 
     @Test
     public void updatePassport_whenPassportStatusIsNull_receiveBadRequest() {
-        Response response = this.findPassportAndSetItsStatusAndAttemptToUpdatePassport(null);
+        final Response response = this.findPassportAndSetItsStatusAndAttemptToUpdatePassport(null);
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenPassportStatusIsNull_receiveRelatedMessage() {
-        Response response = this.findPassportAndSetItsStatusAndAttemptToUpdatePassport(null);
+        final Response response = this.findPassportAndSetItsStatusAndAttemptToUpdatePassport(null);
         extractAndVerifyApiErrorResponseForField(response, "status", "must not be null");
     }
 
     private Response findPassportAndSetItsStatusAndAttemptToUpdatePassport(String passportStatus) {
-        Passport passport = passportRepository.findAll().iterator().next();
-        CreatePassportDto passportForRequest = passportConverter.passportToCreatePassportDto(passport);
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final CreatePassportDto passportForRequest = passportConverter.passportToCreatePassportDto(passport);
         passportForRequest.setStatus(passportStatus);
         return sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(), passportForRequest);
     }
@@ -263,19 +264,19 @@ public class PassportControllerUpdatePassportTest extends BaseTest {
     // Common errors
     @Test
     public void updatePassport_whenPassportHasAllInvalidFields_receiveBadRequest() {
-        Passport passport = passportRepository.findAll().iterator().next();
-        CreatePassportDto invalidCreatePassportDto = getInvalidCreatePassportDto();
-        Response response = sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(),
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final CreatePassportDto invalidCreatePassportDto = getInvalidCreatePassportDto();
+        final Response response = sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(),
                 invalidCreatePassportDto);
         verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void updatePassport_whenPassportHasAllInvalidFields_receiveErrorMessages() {
-        Passport passport = passportRepository.findAll().iterator().next();
-        CreatePassportDto invalidCreatePassportDto = getInvalidCreatePassportDto();
-        Response response = sendCreatePassportDtoToPersonPassportEndpoint(passport.getId(), invalidCreatePassportDto);
-        ApiError apiErrorResponse = extractDataFromResponse(response, ApiError.class);
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final CreatePassportDto invalidCreatePassportDto = getInvalidCreatePassportDto();
+        final Response response = sendCreatePassportDtoToPersonPassportEndpoint(passport.getId(), invalidCreatePassportDto);
+        final ApiError apiErrorResponse = extractDataFromResponse(response, ApiError.class);
         AssertionsForClassTypes.assertThat(apiErrorResponse.getValidationErrors().size()).isEqualTo(5);
     }
 }

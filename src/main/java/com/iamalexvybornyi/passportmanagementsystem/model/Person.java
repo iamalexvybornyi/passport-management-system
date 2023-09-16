@@ -4,33 +4,30 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 
 @EqualsAndHashCode
 @Data
+@NoArgsConstructor
 public class Person {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private @NonNull String id;
 
+    @NonNull
     private String name;
 
+    @NonNull
     private List<Passport> passports;
 
     @JsonFormat(pattern="dd-MM-yyyy")
     private LocalDate birthDate;
 
+    @NonNull
     private String birthCountry;
-
-    private static AtomicLong idCounter = new AtomicLong();
-
-    public Person() {
-        this.id = idCounter.incrementAndGet();
-    }
 }

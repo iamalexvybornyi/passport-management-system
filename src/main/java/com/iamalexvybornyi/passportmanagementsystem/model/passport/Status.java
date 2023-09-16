@@ -1,6 +1,7 @@
 package com.iamalexvybornyi.passportmanagementsystem.model.passport;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import lombok.NonNull;
 
 import java.util.Arrays;
 
@@ -8,8 +9,9 @@ public enum Status {
     ACTIVE,
     INACTIVE;
 
+    @NonNull
     @JsonCreator
-    public static Status getPassportStatusFromString(String value) {
+    public static Status getPassportStatusFromString(@NonNull String value) {
         for (Status status : Status.values()) {
             if (status.toString().equalsIgnoreCase(value)) {
                 return status;

@@ -16,7 +16,7 @@ import javax.validation.constraints.Size;
 public class PassportWithPersonDto {
 
     @NotNull
-    private Long id;
+    private String id;
 
     @NotNull
     @Size(min = 5, max = 20)

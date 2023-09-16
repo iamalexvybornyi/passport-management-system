@@ -4,6 +4,7 @@ import com.iamalexvybornyi.passportmanagementsystem.BaseTest;
 import com.iamalexvybornyi.passportmanagementsystem.dto.passport.CreatePassportDto;
 import com.iamalexvybornyi.passportmanagementsystem.dto.person.PersonDto;
 import com.iamalexvybornyi.passportmanagementsystem.model.Person;
+import com.iamalexvybornyi.passportmanagementsystem.model.passport.Status;
 import com.iamalexvybornyi.passportmanagementsystem.service.PersonService;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -21,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class PersonControllerGetPersonsTest extends BaseTest {
 
-    private PersonService personService;
+    private final PersonService personService;
 
     @Autowired
     public PersonControllerGetPersonsTest(
@@ -33,7 +34,8 @@ public class PersonControllerGetPersonsTest extends BaseTest {
     @BeforeEach
     public void createValidPerson() {
         for (int i = 1; i <= 10; i++) {
-            Person person = new Person();
+            final Person person = new Person();
+            person.setId(idGeneratorUtil.generatePersonId());
             person.setName("Some Name " + i);
             person.setBirthCountry("Country " + i);
             person.setBirthDate(LocalDate.of(1990, 1, 1));
@@ -43,14 +45,14 @@ public class PersonControllerGetPersonsTest extends BaseTest {
 
     @Test
     public void getPersons_whenPersonsExist_receiveOk() {
-        Response response = getPersonsFromPersonEndpoint();
+        final Response response = getPersonsFromPersonEndpoint();
         verifyResponseStatusCode(response, HttpStatus.OK.value());
     }
 
     @Test
     public void getPersons_whenPersonsDoNotExist_receiveOk() {
         personRepository.deleteAll();
-        Response response = getPersonsFromPersonEndpoint();
+        final Response response = getPersonsFromPersonEndpoint();
         verifyResponseStatusCode(response, HttpStatus.OK.value());
     }
 
@@ -67,45 +69,45 @@ public class PersonControllerGetPersonsTest extends BaseTest {
 
     @Test
     public void getPersons_whenPassportNumberIsUsedAndExists_receiveOk() {
-        Person person = personRepository.findAll().iterator().next();
-        CreatePassportDto validPassport = getValidCreatePassportDto();
+        final Person person = personRepository.findAll().iterator().next();
+        final CreatePassportDto validPassport = getValidCreatePassportDto(Status.ACTIVE);
         personService.addPersonPassport(person.getId(), validPassport);
-        Response response = getPersonsFromPersonEndpoint("passportNumber=" + validPassport.getPassportNumber());
+        final Response response = getPersonsFromPersonEndpoint("passportNumber=" + validPassport.getPassportNumber());
         verifyResponseStatusCode(response, HttpStatus.OK.value());
     }
 
     @Test
     public void getPersons_whenPassportNumberIsUsedAndExists_receiveCorrectListOfPersonDto() {
-        Person person = personRepository.findAll().iterator().next();
-        List<PersonDto> expectedListOfPersons = List.of(personConverter.personToPersonDto(person));
-        CreatePassportDto validPassport = getValidCreatePassportDto();
+        final Person person = personRepository.findAll().iterator().next();
+        final List<PersonDto> expectedListOfPersons = List.of(personConverter.personToPersonDto(person));
+        final CreatePassportDto validPassport = getValidCreatePassportDto(Status.ACTIVE);
         personService.addPersonPassport(person.getId(), validPassport);
-        Response response = getPersonsFromPersonEndpoint("passportNumber=" + validPassport.getPassportNumber());
-        List<PersonDto> actualListOfPersons = List.of(extractDataFromResponse(response, PersonDto[].class));
+        final Response response = getPersonsFromPersonEndpoint("passportNumber=" + validPassport.getPassportNumber());
+        final List<PersonDto> actualListOfPersons = List.of(extractDataFromResponse(response, PersonDto[].class));
         assertThat(actualListOfPersons).isEqualTo(expectedListOfPersons);
     }
 
     @Test
     public void getPersons_whenPassportNumberIsUsedAndDoesNotExist_receiveOk() {
-        Response response = getPersonsFromPersonEndpoint("passportNumber=" +
+        final Response response = getPersonsFromPersonEndpoint("passportNumber=" +
                 RandomStringUtils.randomAlphanumeric(10));
         verifyResponseStatusCode(response, HttpStatus.OK.value());
     }
 
     @Test
     public void getPersons_whenPassportNumberIsUsedAndAndDoesNotExist_receiveEmptyListOfPersonDto() {
-        Response response = getPersonsFromPersonEndpoint("passportNumber=" +
+        final Response response = getPersonsFromPersonEndpoint("passportNumber=" +
                 RandomStringUtils.randomAlphanumeric(10));
-        List<PersonDto> actualListOfPersons = List.of(extractDataFromResponse(response, PersonDto[].class));
-        List<PersonDto> expectedListOfPersons = new ArrayList<>();
+        final List<PersonDto> actualListOfPersons = List.of(extractDataFromResponse(response, PersonDto[].class));
+        final List<PersonDto> expectedListOfPersons = new ArrayList<>();
         assertThat(actualListOfPersons).isEqualTo(expectedListOfPersons);
     }
 
     private void getPersonListAndVerifyItsContents() {
-        List<PersonDto> expectedPersonDtoList = new ArrayList<>();
+        final List<PersonDto> expectedPersonDtoList = new ArrayList<>();
         personRepository.findAll()
                 .forEach(person -> expectedPersonDtoList.add(personConverter.personToPersonDto(person)));
-        List<PersonDto> actualPersonDtoList = Arrays.asList(extractDataFromResponse(getPersonsFromPersonEndpoint(),
+        final List<PersonDto> actualPersonDtoList = Arrays.asList(extractDataFromResponse(getPersonsFromPersonEndpoint(),
                 PersonDto[].class));
         assertThat(actualPersonDtoList).isEqualTo(expectedPersonDtoList);
     }

@@ -2,7 +2,9 @@ package com.iamalexvybornyi.passportmanagementsystem.repository;
 
 import com.iamalexvybornyi.passportmanagementsystem.model.Person;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -10,25 +12,23 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
+@RequiredArgsConstructor
 public class PassportRepositoryCollectionImpl implements PassportRepository {
 
     private final Set<Passport> passports = new HashSet<>();
 
     private final PersonRepository personRepository;
 
-    @Autowired
-    public PassportRepositoryCollectionImpl(PersonRepository personRepository) {
-        this.personRepository = personRepository;
-    }
-
     @Override
-    public Passport save(Passport passport) {
+    @NonNull
+    public Passport save(@NonNull Passport passport) {
         this.passports.add(passport);
         return passport;
     }
 
     @Override
-    public Passport findById(Long id) {
+    @Nullable
+    public Passport findById(@NonNull String id) {
         return this.passports.stream()
                 .filter(passport -> passport.getId().equals(id))
                 .findFirst()
@@ -36,7 +36,8 @@ public class PassportRepositoryCollectionImpl implements PassportRepository {
     }
 
     @Override
-    public Passport findByPassportNumber(String passportNumber) {
+    @Nullable
+    public Passport findByPassportNumber(@NonNull String passportNumber) {
         return this.passports.stream()
                 .filter(passport -> passport.getPassportNumber().equals(passportNumber))
                 .findFirst()
@@ -44,12 +45,14 @@ public class PassportRepositoryCollectionImpl implements PassportRepository {
     }
 
     @Override
+    @NonNull
     public Iterable<Passport> findAll() {
         return this.passports;
     }
 
     @Override
-    public Iterable<Passport> findByGivenDateBetween(LocalDate startDate, LocalDate endDate) {
+    @NonNull
+    public Iterable<Passport> findByGivenDateBetween(@Nullable LocalDate startDate, @Nullable LocalDate endDate) {
         List<Passport> foundPassports = new ArrayList<>(this.passports);
         if (startDate != null) {
             foundPassports = foundPassports
@@ -67,18 +70,18 @@ public class PassportRepositoryCollectionImpl implements PassportRepository {
     }
 
     @Override
-    public void delete(Passport passport) {
-        Person person = personRepository.findByPassportNumber(passport.getPassportNumber());
+    public void delete(@NonNull Passport passport) {
+        final Person person = personRepository.findByPassportNumber(passport.getPassportNumber());
         personRepository.findById(person.getId()).getPassports().remove(passport);
         this.passports.remove(passport);
     }
 
     @Override
     public void deleteAll() {
-        Iterator<Passport> passportIterator = this.passports.iterator();
+        final Iterator<Passport> passportIterator = this.passports.iterator();
         while (passportIterator.hasNext()) {
-            Passport passport = passportIterator.next();
-            Person person = personRepository.findByPassportNumber(passport.getPassportNumber());
+            final Passport passport = passportIterator.next();
+            final Person person = personRepository.findByPassportNumber(passport.getPassportNumber());
             if (person != null) {
                 personRepository.findById(person.getId()).getPassports().remove(passport);
             }

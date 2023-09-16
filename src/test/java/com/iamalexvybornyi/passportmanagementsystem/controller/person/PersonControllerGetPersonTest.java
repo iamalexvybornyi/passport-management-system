@@ -17,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class PersonControllerGetPersonTest extends BaseTest {
 
-    private PersonConverter personConverter;
+    private final PersonConverter personConverter;
 
-    private PassportConverter passportConverter;
+    private final PassportConverter passportConverter;
 
     @Autowired
     public PersonControllerGetPersonTest(
@@ -33,7 +33,8 @@ public class PersonControllerGetPersonTest extends BaseTest {
     @BeforeEach
     public void createValidPerson() {
         for (int i = 1; i <= 10; i++) {
-            Person person = new Person();
+            final Person person = new Person();
+            person.setId(idGeneratorUtil.generatePersonId());
             person.setName("Some Name " + i);
             person.setBirthCountry("Country " + i);
             person.setBirthDate(LocalDate.of(1990, 1, 1));
@@ -43,29 +44,23 @@ public class PersonControllerGetPersonTest extends BaseTest {
 
     @Test
     public void getPerson_whenIdExistsAndIsValid_receiveOk() {
-        Person person = personRepository.findAll().iterator().next();
-        Response response = getPersonByIdFromPersonEndpoint(person.getId());
+        final Person person = personRepository.findAll().iterator().next();
+        final Response response = getPersonByIdFromPersonEndpoint(person.getId());
         verifyResponseStatusCode(response, HttpStatus.OK.value());
     }
 
     @Test
     public void getPerson_whenIdExistsAndIsValid_receiveCorrectPersonDto() {
-        Person person = personRepository.findAll().iterator().next();
-        PersonDto expectedPersonDto = personConverter.personToPersonDto(person);
-        PersonDto actualPersonDto = extractDataFromResponse(getPersonByIdFromPersonEndpoint(person.getId()),
+        final Person person = personRepository.findAll().iterator().next();
+        final PersonDto expectedPersonDto = personConverter.personToPersonDto(person);
+        final PersonDto actualPersonDto = extractDataFromResponse(getPersonByIdFromPersonEndpoint(person.getId()),
                 PersonDto.class);
         assertThat(actualPersonDto).isEqualTo(expectedPersonDto);
     }
 
     @Test
     public void getPerson_whenIdDoesNotExistButIsValid_receiveNotFound() {
-        Response response = getPersonByIdFromPersonEndpoint(0L);
+        final Response response = getPersonByIdFromPersonEndpoint(NON_EXISTING_ID);
         verifyResponseStatusCode(response, HttpStatus.NOT_FOUND.value());
-    }
-
-    @Test
-    public void getPerson_whenIdIsNotValid_receiveBadRequest() {
-        Response response = getPersonByIdFromPersonEndpoint("invalid_id");
-        verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
     }
 }

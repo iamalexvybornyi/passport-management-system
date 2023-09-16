@@ -4,6 +4,7 @@ import com.iamalexvybornyi.passportmanagementsystem.BaseTest;
 import com.iamalexvybornyi.passportmanagementsystem.model.ApiError;
 import com.iamalexvybornyi.passportmanagementsystem.model.Person;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
+import com.iamalexvybornyi.passportmanagementsystem.model.passport.Status;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,54 +18,42 @@ public class PassportControllerDeletePassportTest extends BaseTest {
 
     @BeforeEach
     public void createPersonAndPassports() {
-        Person person = new Person();
+        final Person person = new Person();
+        person.setId(idGeneratorUtil.generatePersonId());
         person.setName("Some Name");
         person.setBirthCountry("Country");
         person.setBirthDate(LocalDate.of(1990, 1, 1));
         personRepository.save(person);
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
     }
 
     @Test
     public void deletePassport_whenPassportExists_receiveNoContent() {
-        Passport passport = passportRepository.findAll().iterator().next();
-        Response response = deletePassportByIdFromPassportEndpoint(passport.getId());
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final Response response = deletePassportByIdFromPassportEndpoint(passport.getId());
         verifyResponseStatusCode(response, HttpStatus.NO_CONTENT.value());
     }
 
     @Test
     public void deletePassport_whenPassportExists_passportIsDeletedFromDatasource() {
-        Passport passport = passportRepository.findAll().iterator().next();
+        final Passport passport = passportRepository.findAll().iterator().next();
         deletePassportByIdFromPassportEndpoint(passport.getId());
-        Passport updatedPassport = passportRepository.findById(passport.getId());
+        final Passport updatedPassport = passportRepository.findById(passport.getId());
         assertThat(updatedPassport).isEqualTo(null);
     }
 
     @Test
     public void deletePassport_whenPassportDoesNotExist_receiveNotFound() {
-        Response response = deletePassportByIdFromPassportEndpoint(0L);
+        final Response response = deletePassportByIdFromPassportEndpoint(NON_EXISTING_ID);
         verifyResponseStatusCode(response, HttpStatus.NOT_FOUND.value());
     }
 
     @Test
     public void deletePassport_whenPassportDoesNotExist_receiveRelatedError() {
-        Response response = deletePassportByIdFromPassportEndpoint(0L);
-        ApiError apiError = extractDataFromResponse(response, ApiError.class);
+        final Response response = deletePassportByIdFromPassportEndpoint(NON_EXISTING_ID);
+        final ApiError apiError = extractDataFromResponse(response, ApiError.class);
         assertThat(apiError.getMessage()).isEqualTo("Passport is not found");
-    }
-
-    @Test
-    public void deletePassport_whenPassportIdIsInvalid_receiveBadRequest() {
-        Response response = deletePassportByIdFromPassportEndpoint("invalid_id");
-        verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
-    }
-
-    @Test
-    public void deletePassport_whenPassportIdIsInvalid_receiveRelatedError() {
-        Response response = deletePassportByIdFromPassportEndpoint("invalid_id");
-        ApiError apiError = extractDataFromResponse(response, ApiError.class);
-        assertThat(apiError.getMessage()).isEqualTo("Invalid input data");
     }
 }

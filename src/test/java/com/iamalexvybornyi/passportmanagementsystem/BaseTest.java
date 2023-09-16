@@ -11,11 +11,13 @@ import com.iamalexvybornyi.passportmanagementsystem.repository.PassportRepositor
 import com.iamalexvybornyi.passportmanagementsystem.repository.PersonRepository;
 import com.iamalexvybornyi.passportmanagementsystem.service.PassportService;
 import com.iamalexvybornyi.passportmanagementsystem.service.PersonService;
+import com.iamalexvybornyi.passportmanagementsystem.util.IdGeneratorUtil;
 import com.iamalexvybornyi.passportmanagementsystem.util.PropertyReaderUtil;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import lombok.NonNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +40,13 @@ public class BaseTest {
 
     private final static String PERSON_ENDPOINT_URL = "/api/v1/persons";
 
-    private final static String PERSON_PASSPORTS_ENDPOINT_URL = "/api/v1/persons/%d/passports";
+    private final static String PERSON_PASSPORTS_ENDPOINT_URL = "/api/v1/persons/%s/passports";
 
     private final static String PASSPORT_ENDPOINT_URL = "/api/v1/passports";
 
-    private final static String PASSPORT_DEACTIVATE_ENDPOINT_URL = "/api/v1/passports/%d/deactivate";
+    private final static String PASSPORT_DEACTIVATE_ENDPOINT_URL = "/api/v1/passports/%s/deactivate";
+
+    protected static final String NON_EXISTING_ID = "non_existing_id";
 
     @Autowired
     protected PersonRepository personRepository;
@@ -65,49 +69,60 @@ public class BaseTest {
     @Autowired
     protected PropertyReaderUtil propertyReaderUtil;
 
+    @Autowired
+    protected IdGeneratorUtil idGeneratorUtil;
+
     @BeforeEach
     public void cleanUp() {
         passportRepository.deleteAll();
         personRepository.deleteAll();
     }
 
-    protected void sendCreatePersonDtoToBasePersonEndpointAndVerifyStatusCode(CreatePersonDto createPersonDto,
-                                                                            int expectedStatusCode) {
+    protected void sendCreatePersonDtoToBasePersonEndpointAndVerifyStatusCode(@NonNull CreatePersonDto createPersonDto,
+                                                                              int expectedStatusCode) {
         sendCreatePersonDtoToBasePersonEndpoint(createPersonDto)
                 .then()
                 .statusCode(expectedStatusCode);
     }
 
-    protected Response sendCreatePersonDtoToBasePersonEndpoint(CreatePersonDto createPersonDto) {
+    @NonNull
+    protected Response sendCreatePersonDtoToBasePersonEndpoint(@NonNull CreatePersonDto createPersonDto) {
         return given(requestSpecification())
                 .body(createPersonDto)
                 .when()
                 .post(PERSON_ENDPOINT_URL);
     }
 
-    protected void sendCreatePersonDtoToBasePersonEndpointForUpdateAndVerifyStatusCode(Long id, CreatePersonDto createPersonDto,
-                                                                              int expectedStatusCode) {
+    protected void sendCreatePersonDtoToBasePersonEndpointForUpdateAndVerifyStatusCode(@NonNull String id,
+                                                                                       @NonNull CreatePersonDto createPersonDto,
+                                                                                       int expectedStatusCode) {
         sendCreatePersonDtoToBasePersonEndpointForUpdate(id, createPersonDto)
                 .then()
                 .statusCode(expectedStatusCode);
     }
 
-    protected Response sendCreatePersonDtoToBasePersonEndpointForUpdate(Long id, CreatePersonDto createPersonDto) {
+    @NonNull
+    protected Response sendCreatePersonDtoToBasePersonEndpointForUpdate(@NonNull String id,
+                                                                        @NonNull CreatePersonDto createPersonDto) {
         return given(requestSpecification())
                 .body(createPersonDto)
                 .when()
                 .put(PERSON_ENDPOINT_URL + "/" + id);
     }
 
-    protected Response sendCreatePassportDtoToPersonPassportEndpoint(Long id, CreatePassportDto createPassportDto) {
+    @NonNull
+    protected Response sendCreatePassportDtoToPersonPassportEndpoint(@NonNull String id,
+                                                                     @NonNull CreatePassportDto createPassportDto) {
         return given(requestSpecification())
                 .body(createPassportDto)
                 .when()
                 .post(String.format(PERSON_PASSPORTS_ENDPOINT_URL, id));
     }
 
-    protected Response getPassportsFromPassportEndpointByPersonId(Long id, String... queryParamsWithValues) {
-        StringBuilder finalUrlForRequest = new StringBuilder(String.format(PERSON_PASSPORTS_ENDPOINT_URL, id));
+    @NonNull
+    protected Response getPassportsFromPassportEndpointByPersonId(@NonNull String id,
+                                                                  @NonNull String... queryParamsWithValues) {
+        final StringBuilder finalUrlForRequest = new StringBuilder(String.format(PERSON_PASSPORTS_ENDPOINT_URL, id));
         if (queryParamsWithValues.length > 0) {
             finalUrlForRequest.append("?");
             for (String s : queryParamsWithValues) {
@@ -119,47 +134,39 @@ public class BaseTest {
                 .get(finalUrlForRequest.toString());
     }
 
-    protected Response getPassportsFromPassportEndpointByPersonId(String id) {
+    @NonNull
+    protected Response getPassportsFromPassportEndpointByPersonId(@NonNull String id) {
         return given(requestSpecification())
                 .when()
-                .get(PERSON_PASSPORTS_ENDPOINT_URL.replace("%d", id));
+                .get(String.format(PERSON_PASSPORTS_ENDPOINT_URL, id));
     }
 
-    protected void extractAndVerifyApiErrorResponseForField(Response response, String fieldName, String expectedMessage) {
-        ApiError apiErrorResponse = response.then().extract().as(ApiError.class);
+    protected void extractAndVerifyApiErrorResponseForField(@NonNull Response response,
+                                                            @NonNull String fieldName,
+                                                            @NonNull String expectedMessage) {
+        final ApiError apiErrorResponse = response.then().extract().as(ApiError.class);
         assertThat(apiErrorResponse.getValidationErrors().get(fieldName)).isEqualTo(expectedMessage);
     }
 
-    protected Response getPersonByIdFromPersonEndpoint(Long id) {
+    @NonNull
+    protected Response getPersonByIdFromPersonEndpoint(@NonNull String id) {
         return given(requestSpecification())
                 .when()
                 .get(PERSON_ENDPOINT_URL + "/" + id);
     }
 
-    protected Response getPersonByIdFromPersonEndpoint(String id) {
-        return given(requestSpecification())
-                .when()
-                .get(PERSON_ENDPOINT_URL + "/" + id);
-    }
-
-    protected Response sendCreatePassportDtoToPassportEndpointForUpdate(Long id,
-                                                                              CreatePassportDto createPassportDto) {
+    @NonNull
+    protected Response sendCreatePassportDtoToPassportEndpointForUpdate(@NonNull String id,
+                                                                        @NonNull CreatePassportDto createPassportDto) {
         return given(requestSpecification())
                 .body(createPassportDto)
                 .when()
                 .put(PASSPORT_ENDPOINT_URL + "/" + id);
     }
 
-    protected Response sendCreatePassportDtoToPassportEndpointForUpdate(String id,
-                                                                        CreatePassportDto createPassportDto) {
-        return given(requestSpecification())
-                .body(createPassportDto)
-                .when()
-                .put(PASSPORT_ENDPOINT_URL + "/" + id);
-    }
-
-    protected Response getPassportsFromPassportEndpoint(String... queryParamsWithValues) {
-        StringBuilder finalUrlForRequest = new StringBuilder(PASSPORT_ENDPOINT_URL);
+    @NonNull
+    protected Response getPassportsFromPassportEndpoint(@NonNull String... queryParamsWithValues) {
+        final StringBuilder finalUrlForRequest = new StringBuilder(PASSPORT_ENDPOINT_URL);
         if (queryParamsWithValues.length > 0) {
             finalUrlForRequest.append("?");
             for (String s : queryParamsWithValues) {
@@ -171,44 +178,30 @@ public class BaseTest {
                 .get(finalUrlForRequest.toString());
     }
 
-    protected Response getPassportByIdFromPassportEndpoint(Long id) {
+    @NonNull
+    protected Response getPassportByIdFromPassportEndpoint(@NonNull String id) {
         return given(requestSpecification())
                 .when()
                 .get(PASSPORT_ENDPOINT_URL + "/" + id);
     }
 
-    protected Response getPassportByIdFromPassportEndpoint(String id) {
-        return given(requestSpecification())
-                .when()
-                .get(PASSPORT_ENDPOINT_URL + "/" + id);
-    }
-
-    protected Response deletePassportByIdFromPassportEndpoint(Long id) {
+    @NonNull
+    protected Response deletePassportByIdFromPassportEndpoint(@NonNull String id) {
         return given(requestSpecification())
                 .when()
                 .delete(PASSPORT_ENDPOINT_URL + "/" + id);
     }
 
-    protected Response deletePassportByIdFromPassportEndpoint(String id) {
-        return given(requestSpecification())
-                .when()
-                .delete(PASSPORT_ENDPOINT_URL + "/" + id);
-    }
-
-    protected Response deactivatePassportByIdFromPassportEndpoint(Long id) {
+    @NonNull
+    protected Response deactivatePassportByIdFromPassportEndpoint(@NonNull String id) {
         return given(requestSpecification())
                 .when()
                 .post(String.format(PASSPORT_DEACTIVATE_ENDPOINT_URL, id));
     }
 
-    protected Response deactivatePassportByIdFromPassportEndpoint(String id) {
-        return given(requestSpecification())
-                .when()
-                .post(PASSPORT_DEACTIVATE_ENDPOINT_URL.replace("%d", id));
-    }
-
-    protected Response getPersonsFromPersonEndpoint(String... queryParamsWithValues) {
-        StringBuilder finalUrlForRequest = new StringBuilder(PERSON_ENDPOINT_URL);
+    @NonNull
+    protected Response getPersonsFromPersonEndpoint(@NonNull String... queryParamsWithValues) {
+        final StringBuilder finalUrlForRequest = new StringBuilder(PERSON_ENDPOINT_URL);
         if (queryParamsWithValues.length > 0) {
             finalUrlForRequest.append("?");
             for (String s : queryParamsWithValues) {
@@ -220,14 +213,16 @@ public class BaseTest {
                 .get(finalUrlForRequest.toString());
     }
 
-    protected <T> T extractDataFromResponse(Response response, Class<T> tClass) {
+    @NonNull
+    protected <T> T extractDataFromResponse(@NonNull Response response, @NonNull Class<T> tClass) {
         return response.then().extract().as(tClass);
     }
 
-    protected void verifyResponseStatusCode(Response response, int expectedStatusCode) {
+    protected void verifyResponseStatusCode(@NonNull Response response, int expectedStatusCode) {
         response.then().statusCode(expectedStatusCode);
     }
 
+    @NonNull
     protected RequestSpecification requestSpecification() {
         return new RequestSpecBuilder()
                 .setBaseUri("http://localhost:" + port)
@@ -236,34 +231,38 @@ public class BaseTest {
                 .build();
     }
 
+    @NonNull
     protected CreatePersonDto getValidCreatePersonDto() {
-        CreatePersonDto createPersonDto = new CreatePersonDto();
+        final CreatePersonDto createPersonDto = new CreatePersonDto();
         createPersonDto.setName("Some Name");
         createPersonDto.setBirthCountry("Country");
         createPersonDto.setBirthDate("01-01-1990");
         return createPersonDto;
     }
 
-    protected CreatePassportDto getValidCreatePassportDto() {
-        CreatePassportDto createPassportDto = new CreatePassportDto();
+    @NonNull
+    protected CreatePassportDto getValidCreatePassportDto(@NonNull Status status) {
+        final CreatePassportDto createPassportDto = new CreatePassportDto();
         createPassportDto.setPassportNumber(RandomStringUtils.randomAlphanumeric(10));
         createPassportDto.setPassportType(PassportType.INTERNAL.toString());
         createPassportDto.setDepartmentCode("111-111");
-        createPassportDto.setStatus(Status.ACTIVE.toString());
+        createPassportDto.setStatus(status.toString());
         createPassportDto.setGivenDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         return createPassportDto;
     }
 
+    @NonNull
     protected CreatePersonDto getInvalidCreatePersonDto() {
-        CreatePersonDto createPersonDto = new CreatePersonDto();
+        final CreatePersonDto createPersonDto = new CreatePersonDto();
         createPersonDto.setName("A");
         createPersonDto.setBirthCountry("B");
         createPersonDto.setBirthDate(null);
         return createPersonDto;
     }
 
+    @NonNull
     protected CreatePassportDto getInvalidCreatePassportDto() {
-        CreatePassportDto createPassportDto = new CreatePassportDto();
+        final CreatePassportDto createPassportDto = new CreatePassportDto();
         createPassportDto.setPassportType(null);
         createPassportDto.setPassportNumber(null);
         createPassportDto.setGivenDate(null);

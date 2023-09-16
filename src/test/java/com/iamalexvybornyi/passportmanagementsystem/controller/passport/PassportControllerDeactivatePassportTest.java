@@ -18,73 +18,61 @@ public class PassportControllerDeactivatePassportTest extends BaseTest {
 
     @BeforeEach
     public void createPersonAndPassports() {
-        Person person = new Person();
+        final Person person = new Person();
+        person.setId(idGeneratorUtil.generatePersonId());
         person.setName("Some Name");
         person.setBirthCountry("Country");
         person.setBirthDate(LocalDate.of(1990, 1, 1));
         personRepository.save(person);
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
-        personService.addPersonPassport(person.getId(), getValidCreatePassportDto());
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
+        personService.addPersonPassport(person.getId(), getValidCreatePassportDto(Status.ACTIVE));
     }
 
     @Test
     public void deactivatePassport_whenPassportExistsAndIsActive_receiveNoContent() {
-        Passport passport = passportRepository.findAll().iterator().next();
-        Response response = deactivatePassportByIdFromPassportEndpoint(passport.getId());
+        final Passport passport = passportRepository.findAll().iterator().next();
+        final Response response = deactivatePassportByIdFromPassportEndpoint(passport.getId());
         verifyResponseStatusCode(response, HttpStatus.NO_CONTENT.value());
     }
 
     @Test
     public void deactivatePassport_whenPassportExistsAndIsActive_statusIsUpdatedInDatasource() {
-        Passport passport = passportRepository.findAll().iterator().next();
+        final Passport passport = passportRepository.findAll().iterator().next();
         deactivatePassportByIdFromPassportEndpoint(passport.getId());
-        Passport updatedPassport = passportRepository.findById(passport.getId());
+        final Passport updatedPassport = passportRepository.findById(passport.getId());
         assertThat(updatedPassport.getStatus()).isEqualTo(Status.INACTIVE);
     }
 
     @Test
     public void deactivatePassport_whenPassportExistsAndIsInactive_receiveNoContent() {
-        Passport passport = passportRepository.findAll().iterator().next();
+        final Passport passport = passportRepository.findAll().iterator().next();
         passport.setStatus(Status.INACTIVE);
         passportRepository.save(passport);
-        Response response = deactivatePassportByIdFromPassportEndpoint(passport.getId());
+        final Response response = deactivatePassportByIdFromPassportEndpoint(passport.getId());
         verifyResponseStatusCode(response, HttpStatus.NO_CONTENT.value());
     }
 
     @Test
     public void deactivatePassport_whenPassportExistsAndIsInactive_statusIsNotUpdatedInDatasource() {
-        Passport passport = passportRepository.findAll().iterator().next();
+        final Passport passport = passportRepository.findAll().iterator().next();
         passport.setStatus(Status.INACTIVE);
         passportRepository.save(passport);
         deactivatePassportByIdFromPassportEndpoint(passport.getId());
-        Passport updatedPassport = passportRepository.findById(passport.getId());
+        final Passport updatedPassport = passportRepository.findById(passport.getId());
         assertThat(updatedPassport.getStatus()).isEqualTo(Status.INACTIVE);
     }
 
     @Test
     public void deactivatePassport_whenPassportDoesNotExist_receiveNotFound() {
-        Response response = deactivatePassportByIdFromPassportEndpoint(0L);
+        final Response response = deactivatePassportByIdFromPassportEndpoint(NON_EXISTING_ID);
         verifyResponseStatusCode(response, HttpStatus.NOT_FOUND.value());
     }
 
     @Test
     public void deactivatePassport_whenPassportDoesNotExist_receiveRelatedError() {
-        Response response = deactivatePassportByIdFromPassportEndpoint(0L);
-        ApiError apiError = extractDataFromResponse(response, ApiError.class);
+        final Response response = deactivatePassportByIdFromPassportEndpoint(NON_EXISTING_ID);
+        final ApiError apiError = extractDataFromResponse(response, ApiError.class);
         assertThat(apiError.getMessage()).isEqualTo("Passport is not found");
-    }
-
-    @Test
-    public void deactivatePassport_whenPassportIdIsInvalid_receiveBadRequest() {
-        Response response = deactivatePassportByIdFromPassportEndpoint("invalid_id");
-        verifyResponseStatusCode(response, HttpStatus.BAD_REQUEST.value());
-    }
-
-    @Test
-    public void deactivatePassport_whenPassportIdIsInvalid_receiveRelatedError() {
-        Response response = deactivatePassportByIdFromPassportEndpoint("invalid_id");
-        ApiError apiError = extractDataFromResponse(response, ApiError.class);
-        assertThat(apiError.getMessage()).isEqualTo("Invalid input data");
     }
 }

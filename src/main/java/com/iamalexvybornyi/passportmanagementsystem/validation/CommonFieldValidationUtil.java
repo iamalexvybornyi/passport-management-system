@@ -6,7 +6,6 @@ import com.iamalexvybornyi.passportmanagementsystem.exception.BusinessValidation
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
 import com.iamalexvybornyi.passportmanagementsystem.repository.PassportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +31,7 @@ public class CommonFieldValidationUtil {
     }
 
     public void verifyCreatePersonDtoForBusinessRequirements(CreatePersonDto createPersonDto) {
-        Map<String, String> errors = new HashMap<>();
+        final Map<String, String> errors = new HashMap<>();
         if (LocalDate.parse(createPersonDto.getBirthDate(), DateTimeFormatter.ofPattern( "dd-MM-yyyy" ))
                 .compareTo(LocalDate.now().minusYears(14)) >= 0) {
             errors.put("birthDate", messageSource.getMessage(
@@ -45,9 +44,9 @@ public class CommonFieldValidationUtil {
         }
     }
 
-    public void verifyCreatePassportDtoForBusinessRequirements(Long passportId, CreatePassportDto createPassportDto) {
-        Passport foundPassport = passportRepository.findByPassportNumber(createPassportDto.getPassportNumber());
-        Map<String, String> errors = new HashMap<>();
+    public void verifyCreatePassportDtoForBusinessRequirements(String passportId, CreatePassportDto createPassportDto) {
+        final Passport foundPassport = passportRepository.findByPassportNumber(createPassportDto.getPassportNumber());
+        final Map<String, String> errors = new HashMap<>();
         if (foundPassport != null && !foundPassport.getId().equals(passportId)) {
             errors.put("passportNumber", messageSource.getMessage(
                     "passport.management.system.constraints.unique.passport.number.message",

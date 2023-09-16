@@ -3,34 +3,36 @@ package com.iamalexvybornyi.passportmanagementsystem.model.passport;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.concurrent.atomic.AtomicLong;
 
 @EqualsAndHashCode
 @Data
 public class Passport {
 
+    @NonNull
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
+    @NonNull
     private String passportNumber;
 
+    @NonNull
     @JsonFormat(pattern="dd-MM-yyyy")
     private LocalDate givenDate;
 
+    @NonNull
     private String departmentCode;
 
+    @NonNull
     private PassportType passportType;
 
+    @NonNull
     private Status status;
-
-    private static AtomicLong idCounter = new AtomicLong();
-
+    
     public Passport() {
-        this.id = idCounter.incrementAndGet();
         this.status = Status.ACTIVE;
     }
 

@@ -10,7 +10,7 @@ public class AppConfig {
 
     @Bean
     public MessageSource messageSource() {
-        ReloadableResourceBundleMessageSource messageSource
+        final ReloadableResourceBundleMessageSource messageSource
                 = new ReloadableResourceBundleMessageSource();
         messageSource.setBasenames(
                 "classpath:/ValidationMessages"

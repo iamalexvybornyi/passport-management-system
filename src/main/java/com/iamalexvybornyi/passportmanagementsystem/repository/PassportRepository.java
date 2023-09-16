@@ -1,22 +1,29 @@
 package com.iamalexvybornyi.passportmanagementsystem.repository;
 
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
+import lombok.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
 
 public interface PassportRepository {
 
-    Passport save(Passport passport);
+    @NonNull
+    Passport save(@NonNull Passport passport);
 
-    Passport findById(Long id);
+    @Nullable
+    Passport findById(@NonNull String id);
 
-    Passport findByPassportNumber(String passportNumber);
+    @Nullable
+    Passport findByPassportNumber(@NonNull String passportNumber);
 
+    @NonNull
     Iterable<Passport> findAll();
 
-    Iterable<Passport> findByGivenDateBetween(LocalDate startDate, LocalDate endDate);
+    @NonNull
+    Iterable<Passport> findByGivenDateBetween(@Nullable LocalDate startDate, @Nullable LocalDate endDate);
 
-    void delete(Passport passport);
+    void delete(@NonNull Passport passport);
 
     void deleteAll();
 

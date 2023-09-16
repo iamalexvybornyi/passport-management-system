@@ -1,18 +1,24 @@
 package com.iamalexvybornyi.passportmanagementsystem.repository;
 
 import com.iamalexvybornyi.passportmanagementsystem.model.Person;
+import lombok.NonNull;
+import org.springframework.lang.Nullable;
 
 public interface PersonRepository {
 
-    Person save(Person person);
+    @NonNull
+    Person save(@NonNull Person person);
 
-    Person findById(Long id);
+    @Nullable
+    Person findById(@NonNull String id);
 
+    @NonNull
     Iterable<Person> findAll();
 
-    Person findByPassportNumber(String passportNumber);
+    @Nullable
+    Person findByPassportNumber(@NonNull String passportNumber);
 
-    void delete(Person person);
+    void delete(@NonNull Person person);
 
     void deleteAll();
 }

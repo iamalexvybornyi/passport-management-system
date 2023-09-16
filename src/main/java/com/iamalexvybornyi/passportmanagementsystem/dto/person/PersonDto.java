@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 public class PersonDto {
 
     @NotNull
-    private Long id;
+    private String id;
 
     @NotNull
     @Size(min = 5, max = 75)

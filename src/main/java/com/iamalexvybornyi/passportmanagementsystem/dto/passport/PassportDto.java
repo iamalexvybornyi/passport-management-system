@@ -9,14 +9,13 @@ import lombok.EqualsAndHashCode;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.Objects;
 
 @EqualsAndHashCode
 @Data
 public class PassportDto {
 
     @NotNull
-    private Long id;
+    private String id;
 
     @NotNull
     @Size(min = 5, max = 20)

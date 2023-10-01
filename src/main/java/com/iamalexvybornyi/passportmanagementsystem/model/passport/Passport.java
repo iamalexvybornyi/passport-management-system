@@ -1,11 +1,11 @@
 package com.iamalexvybornyi.passportmanagementsystem.model.passport;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
-import javax.persistence.*;
 import java.time.LocalDate;
 
 @EqualsAndHashCode
@@ -20,7 +20,7 @@ public class Passport {
     private String passportNumber;
 
     @NonNull
-    @JsonFormat(pattern="dd-MM-yyyy")
+    @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate givenDate;
 
     @NonNull
@@ -31,6 +31,8 @@ public class Passport {
 
     @NonNull
     private Status status;
+    @NonNull
+    private String personId;
     
     public Passport() {
         this.status = Status.ACTIVE;

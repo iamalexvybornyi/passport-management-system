@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+  db:
+    image: 'postgres:16-alpine'
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=
+      - POSTGRES_DB=passport-management-system-db
+  app:
+    image: 'passport-management-system:latest'
+    build:
+      context: .
+    container_name: passport-management-system
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/passport-management-system-db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=

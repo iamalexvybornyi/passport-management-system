@@ -35,7 +35,7 @@ public class PersonControllerUpdatePersonTest extends BaseTest {
         final CreatePersonDto createPersonDto = personConverter.personToCreatePersonDto(person);
         createPersonDto.setName(createPersonDto.getName() + " updated");
         createPersonDto.setBirthCountry(createPersonDto.getBirthCountry() + " updated");
-        createPersonDto.setBirthDate(LocalDate.now().minusYears(15).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPersonDto.setBirthDate(LocalDate.now().minusYears(15).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         PersonDto personDto = sendCreatePersonDtoToBasePersonEndpoint(createPersonDto)
                 .then().extract().as(PersonDto.class);
         assertThat(personDto).isNotNull();
@@ -50,14 +50,14 @@ public class PersonControllerUpdatePersonTest extends BaseTest {
         final CreatePersonDto createPersonDto = personConverter.personToCreatePersonDto(person);
         createPersonDto.setName(createPersonDto.getName() + " updated");
         createPersonDto.setBirthCountry(createPersonDto.getBirthCountry() + " updated");
-        createPersonDto.setBirthDate(LocalDate.now().minusYears(15).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPersonDto.setBirthDate(LocalDate.now().minusYears(15).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         final PersonDto personDto = sendCreatePersonDtoToBasePersonEndpoint(createPersonDto)
                 .then().extract().as(PersonDto.class);
 
         final Person updatedPerson = personRepository.findById(personDto.getId());
         assertThat(updatedPerson).isNotNull();
         assertThat(updatedPerson.getBirthCountry()).isEqualTo(createPersonDto.getBirthCountry());
-        assertThat(updatedPerson.getBirthDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+        assertThat(updatedPerson.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .isEqualTo(createPersonDto.getBirthDate());
         assertThat(updatedPerson.getName()).isEqualTo(createPersonDto.getName());
     }
@@ -214,7 +214,7 @@ public class PersonControllerUpdatePersonTest extends BaseTest {
     public void updatePerson_whenPersonHasInappropriateBirthDateValue_receiveRelatedMessage() {
         final Person person = personRepository.findAll().iterator().next();
         final CreatePersonDto createPersonDto = personConverter.personToCreatePersonDto(person);
-        createPersonDto.setBirthDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPersonDto.setBirthDate(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         final Response response = sendCreatePersonDtoToBasePersonEndpointForUpdate(person.getId(), createPersonDto);
         extractAndVerifyApiErrorResponseForField(response, "birthDate",
                 propertyReaderUtil.getBirthDateValidationMessage());
@@ -224,7 +224,7 @@ public class PersonControllerUpdatePersonTest extends BaseTest {
     public void updatePerson_whenPersonHasInappropriateBirthDateValue_receiveUnprocessableEntity() {
         final Person person = personRepository.findAll().iterator().next();
         final CreatePersonDto createPersonDto = personConverter.personToCreatePersonDto(person);
-        createPersonDto.setBirthDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPersonDto.setBirthDate(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         sendCreatePersonDtoToBasePersonEndpointForUpdateAndVerifyStatusCode(person.getId(), createPersonDto,
                 HttpStatus.UNPROCESSABLE_ENTITY.value());
     }

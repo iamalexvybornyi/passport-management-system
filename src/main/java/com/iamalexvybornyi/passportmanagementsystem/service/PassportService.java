@@ -56,7 +56,7 @@ public class PassportService {
         passportFromRepo.setPassportNumber(createPassportDto.getPassportNumber());
         passportFromRepo.setStatus(Status.getPassportStatusFromString(createPassportDto.getStatus()));
         passportFromRepo.setGivenDate(LocalDate.parse(createPassportDto.getGivenDate(),
-                DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         passportFromRepo.setDepartmentCode(createPassportDto.getDepartmentCode());
         passportRepository.save(passportFromRepo);
         return passportConverter.passportToPassportDto(passportFromRepo);

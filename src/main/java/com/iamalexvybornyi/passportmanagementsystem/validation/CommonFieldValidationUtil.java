@@ -32,7 +32,7 @@ public class CommonFieldValidationUtil {
 
     public void verifyCreatePersonDtoForBusinessRequirements(CreatePersonDto createPersonDto) {
         final Map<String, String> errors = new HashMap<>();
-        if (LocalDate.parse(createPersonDto.getBirthDate(), DateTimeFormatter.ofPattern( "dd-MM-yyyy" ))
+        if (LocalDate.parse(createPersonDto.getBirthDate(), DateTimeFormatter.ofPattern( "yyyy-MM-dd" ))
                 .compareTo(LocalDate.now().minusYears(14)) >= 0) {
             errors.put("birthDate", messageSource.getMessage(
                     "passport.management.system.constraints.birth.date.validation.message",

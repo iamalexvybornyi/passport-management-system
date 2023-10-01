@@ -5,6 +5,7 @@ import lombok.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface PassportRepository {
 
@@ -16,6 +17,9 @@ public interface PassportRepository {
 
     @Nullable
     Passport findByPassportNumber(@NonNull String passportNumber);
+
+    @NonNull
+    List<Passport> findByPersonId(@NonNull String personId);
 
     @NonNull
     Iterable<Passport> findAll();

@@ -22,7 +22,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
@@ -32,7 +32,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "/TestValidationMessages.properties")
+@TestPropertySource(locations = {"/TestValidationMessages.properties"})
 public class BaseTest {
 
     @LocalServerPort
@@ -236,7 +236,7 @@ public class BaseTest {
         final CreatePersonDto createPersonDto = new CreatePersonDto();
         createPersonDto.setName("Some Name");
         createPersonDto.setBirthCountry("Country");
-        createPersonDto.setBirthDate("01-01-1990");
+        createPersonDto.setBirthDate("1990-01-01");
         return createPersonDto;
     }
 
@@ -247,7 +247,7 @@ public class BaseTest {
         createPassportDto.setPassportType(PassportType.INTERNAL.toString());
         createPassportDto.setDepartmentCode("111-111");
         createPassportDto.setStatus(status.toString());
-        createPassportDto.setGivenDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPassportDto.setGivenDate(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         return createPassportDto;
     }
 

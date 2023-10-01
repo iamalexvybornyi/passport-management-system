@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,11 +61,11 @@ public class PersonControllerGetPassportsTest extends BaseTest {
     @Test
     public void getPassports_whenPassportsExist_receiveExpectedPassports() {
         final Person person = personRepository.findAll().iterator().next();
-        final List<PassportDto> expectedListOfPassports = new ArrayList<>();
-        person.getPassports()
-                .stream().filter(passport -> passport.getStatus().equals(Status.ACTIVE))
-                .forEach(passport ->
-                expectedListOfPassports.add(passportConverter.passportToPassportDto(passport)));
+        final List<PassportDto> expectedListOfPassports = passportRepository.findByPersonId(person.getId())
+                .stream()
+                .filter(passport -> passport.getStatus().equals(Status.ACTIVE))
+                .map(passportConverter::passportToPassportDto)
+                .toList();
         final Response response = getPassportsFromPassportEndpointByPersonId(person.getId());
         final List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
         assertThat(actualListOfPassports).isEqualTo(expectedListOfPassports);
@@ -82,9 +83,10 @@ public class PersonControllerGetPassportsTest extends BaseTest {
     public void getPassports_whenPassportsDoNotExist_receiveExpectedPassports() {
         passportRepository.deleteAll();
         final Person person = personRepository.findAll().iterator().next();
-        final List<PassportDto> expectedListOfPassports = new ArrayList<>();
-        person.getPassports().forEach(passport ->
-                expectedListOfPassports.add(passportConverter.passportToPassportDto(passport)));
+        final List<PassportDto> expectedListOfPassports = passportRepository.findByPersonId(person.getId())
+                .stream()
+                .map(passportConverter::passportToPassportDto)
+                .toList();
         final Response response = getPassportsFromPassportEndpointByPersonId(person.getId());
         final List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
         assertThat(actualListOfPassports).isEqualTo(expectedListOfPassports);
@@ -100,9 +102,11 @@ public class PersonControllerGetPassportsTest extends BaseTest {
     @Test
     public void getPassports_whenPassportsExistAndStatusIsInactive_receiveExpectedPassports() {
         final Person person = personRepository.findAll().iterator().next();
-        final List<PassportDto> expectedListOfPassports = new ArrayList<>();
-        person.getPassports().stream().filter(passport -> passport.getStatus().equals(Status.INACTIVE))
-                .forEach(passport -> expectedListOfPassports.add(passportConverter.passportToPassportDto(passport)));
+        final List<PassportDto> expectedListOfPassports = passportRepository.findByPersonId(person.getId())
+                .stream()
+                .filter(passport -> passport.getStatus().equals(Status.INACTIVE))
+                .map(passportConverter::passportToPassportDto)
+                .toList();
         final Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "status=INACTIVE");
         final List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
         assertThat(actualListOfPassports).isEqualTo(expectedListOfPassports);
@@ -119,13 +123,13 @@ public class PersonControllerGetPassportsTest extends BaseTest {
     public void getPassports_whenPassportsExistAndStatusIsActive_receiveExpectedPassports() {
         final Person person = personRepository.findAll().iterator().next();
         passportService.deactivatePassport(
-                Objects.requireNonNull(person.getPassports().stream().findAny().orElse(null)).getId());
-        final List<PassportDto> expectedListOfPassports = new ArrayList<>();
-        person.getPassports().forEach(passport -> {
-            if (passport.getStatus().equals(Status.ACTIVE)) {
-                expectedListOfPassports.add(passportConverter.passportToPassportDto(passport));
-            }
-        });
+                Objects.requireNonNull(passportRepository.findByPersonId(person.getId()).stream().findFirst()
+                        .orElse(null)).getId());
+        final List<PassportDto> expectedListOfPassports = passportRepository.findByPersonId(person.getId())
+                .stream()
+                .filter(passport -> passport.getStatus().equals(Status.ACTIVE))
+                .map(passportConverter::passportToPassportDto)
+                .toList();
         final Response response = getPassportsFromPassportEndpointByPersonId(person.getId(), "status=ACTIVE");
         final List<PassportDto> actualListOfPassports = Arrays.asList(extractDataFromResponse(response, PassportDto[].class));
         assertThat(actualListOfPassports).isEqualTo(expectedListOfPassports);

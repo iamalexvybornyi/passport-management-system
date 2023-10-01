@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -77,7 +76,7 @@ public class PersonService {
         final Person personFromRepo = this.getPersonById(id);
         personFromRepo.setName(createPersonDto.getName());
         personFromRepo.setBirthCountry(createPersonDto.getBirthCountry());
-        personFromRepo.setBirthDate(LocalDate.parse(createPersonDto.getBirthDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        personFromRepo.setBirthDate(LocalDate.parse(createPersonDto.getBirthDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         personRepository.save(personFromRepo);
         return personConverter.personToPersonDto(personFromRepo);
     }
@@ -85,34 +84,22 @@ public class PersonService {
     @NonNull
     public PassportDto addPersonPassport(@NonNull String id, @NonNull CreatePassportDto createPassportDto) {
         commonFieldValidationUtil.verifyCreatePassportDtoForBusinessRequirements(null, createPassportDto);
-        final Person personFromRepo = this.getPersonById(id);
-        List<Passport> personPassports = personFromRepo.getPassports();
-        if (personPassports == null) {
-            personPassports = new ArrayList<>();
-        }
 
-        final Passport passport = passportConverter.createPassportDtoToPassport(createPassportDto);
+        final Passport passport = passportConverter.createPassportDtoToPassport(createPassportDto, id);
         passport.setId(idGeneratorUtil.generatePassportId());
         passportRepository.save(passport);
 
-        personPassports.add(passport);
-        personFromRepo.setPassports(personPassports);
-        personRepository.save(personFromRepo);
         return passportConverter.passportToPassportDto(passport);
     }
 
     @NonNull
     public List<PassportDto> getPersonPassports(@NonNull String id, @Nullable Status status) {
-        final List<PassportDto> personPassportList = new ArrayList<>();
         final Person personFromRepo = this.getPersonById(id);
-        personFromRepo.getPassports().forEach(passport ->
-                personPassportList.add(passportConverter.passportToPassportDto(passport)));
-        return personPassportList.stream()
-                .filter(passportDto ->
-                        passportDto
-                                .getStatus()
-                                .equals(Optional.ofNullable(status).orElse(Status.ACTIVE).toString()))
-                .collect(Collectors.toList());
+        return passportRepository.findByPersonId(personFromRepo.getId())
+                .stream()
+                .filter(passport -> passport.getStatus().equals(Optional.ofNullable(status).orElse(Status.ACTIVE)))
+                .map(passportConverter::passportToPassportDto)
+                .toList();
     }
 
     private Person getPersonById(@NonNull String id) {

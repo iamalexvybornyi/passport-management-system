@@ -3,18 +3,21 @@ package com.iamalexvybornyi.passportmanagementsystem.repository;
 import com.iamalexvybornyi.passportmanagementsystem.model.Person;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-@Repository
+//@Repository
+@RequiredArgsConstructor
 public class PersonRepositoryCollectionImpl implements PersonRepository {
 
     @NonNull
     private final Set<Person> persons = new HashSet<>();
+
+    @NonNull
+    private final PassportRepository passportRepository;
 
     @Override
     @NonNull
@@ -39,17 +42,14 @@ public class PersonRepositoryCollectionImpl implements PersonRepository {
     }
 
     @Override
-    public Person findByPassportNumber(String passportNumber) {
+    @Nullable
+    public Person findByPassportNumber(@NonNull String passportNumber) {
+        final Passport passport = passportRepository.findByPassportNumber(passportNumber);
+        if (passport == null) {
+            return null;
+        }
         return persons
-                .stream().filter(person -> {
-                    List<Passport> passports = person.getPassports();
-                    if (passports != null) {
-                        return person.getPassports()
-                                .stream().anyMatch(passport -> passport.getPassportNumber().equals(passportNumber));
-                    } else {
-                        return false;
-                    }
-                })
+                .stream().filter(person -> person.getId().equals(passport.getPersonId()))
                 .findFirst().orElse(null);
     }
 

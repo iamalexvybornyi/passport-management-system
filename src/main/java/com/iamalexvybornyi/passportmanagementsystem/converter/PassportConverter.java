@@ -11,19 +11,19 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface PassportConverter {
 
-    @Mapping(target = "givenDate", dateFormat = "dd-MM-yyyy")
+    @Mapping(target = "givenDate", dateFormat = "yyyy-MM-dd")
     @NonNull
     CreatePassportDto passportToCreatePassportDto(@NonNull Passport passport);
 
-    @Mapping(target = "givenDate", dateFormat = "dd-MM-yyyy")
+    @Mapping(target = "givenDate", dateFormat = "yyyy-MM-dd")
     @NonNull
     PassportDto passportToPassportDto(@NonNull Passport passport);
 
-    @Mapping(target = "givenDate", dateFormat = "dd-MM-yyyy")
+    @Mapping(target = "givenDate", dateFormat = "yyyy-MM-dd")
     @NonNull
     PassportWithPersonDto passportToPassportWithPersonDto(@NonNull Passport passport);
 
-    @Mapping(target = "givenDate", dateFormat = "dd-MM-yyyy")
+    @Mapping(target = "givenDate", dateFormat = "yyyy-MM-dd")
     @NonNull
-    Passport createPassportDtoToPassport(@NonNull CreatePassportDto createPassportDto);
+    Passport createPassportDtoToPassport(@NonNull CreatePassportDto createPassportDto, @NonNull String personId);
 }

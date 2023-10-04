@@ -173,7 +173,7 @@ public class PersonControllerCreatePersonTest extends BaseTest {
     @Test
     public void postPerson_whenPersonHasInappropriateBirthDateValue_receiveRelatedMessage() {
         final CreatePersonDto createPersonDto = getValidCreatePersonDto();
-        createPersonDto.setBirthDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPersonDto.setBirthDate(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         final Response response = sendCreatePersonDtoToBasePersonEndpoint(createPersonDto);
         extractAndVerifyApiErrorResponseForField(response, "birthDate",
                 propertyReaderUtil.getBirthDateValidationMessage());
@@ -182,7 +182,7 @@ public class PersonControllerCreatePersonTest extends BaseTest {
     @Test
     public void postPerson_whenPersonHasInappropriateBirthDateValue_receiveUnprocessableEntity() {
         final CreatePersonDto createPersonDto = getValidCreatePersonDto();
-        createPersonDto.setBirthDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPersonDto.setBirthDate(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         sendCreatePersonDtoToBasePersonEndpointAndVerifyStatusCode(createPersonDto,
                 HttpStatus.UNPROCESSABLE_ENTITY.value());
     }
@@ -190,7 +190,7 @@ public class PersonControllerCreatePersonTest extends BaseTest {
     @Test
     public void postPerson_whenPersonIsExactly14YearsOld_receiveRelatedMessage() {
         final CreatePersonDto createPersonDto = getValidCreatePersonDto();
-        createPersonDto.setBirthDate(LocalDate.now().minusYears(14).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPersonDto.setBirthDate(LocalDate.now().minusYears(14).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         Response response = sendCreatePersonDtoToBasePersonEndpoint(createPersonDto);
         extractAndVerifyApiErrorResponseForField(response, "birthDate",
                 propertyReaderUtil.getBirthDateValidationMessage());
@@ -199,7 +199,7 @@ public class PersonControllerCreatePersonTest extends BaseTest {
     @Test
     public void postPerson_whenPersonIsExactly14YearsOld_receiveUnprocessableEntity() {
         final CreatePersonDto createPersonDto = getValidCreatePersonDto();
-        createPersonDto.setBirthDate(LocalDate.now().minusYears(14).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPersonDto.setBirthDate(LocalDate.now().minusYears(14).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         sendCreatePersonDtoToBasePersonEndpointAndVerifyStatusCode(createPersonDto,
                 HttpStatus.UNPROCESSABLE_ENTITY.value());
     }

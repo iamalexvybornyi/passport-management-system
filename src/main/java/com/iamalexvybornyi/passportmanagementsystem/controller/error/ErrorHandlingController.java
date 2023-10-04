@@ -3,6 +3,7 @@ package com.iamalexvybornyi.passportmanagementsystem.controller.error;
 import com.iamalexvybornyi.passportmanagementsystem.exception.BusinessValidationException;
 import com.iamalexvybornyi.passportmanagementsystem.exception.RecordNotFoundException;
 import com.iamalexvybornyi.passportmanagementsystem.model.ApiError;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @ControllerAdvice

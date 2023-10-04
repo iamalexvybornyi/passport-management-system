@@ -1,11 +1,10 @@
 package com.iamalexvybornyi.passportmanagementsystem.dto.person;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 @EqualsAndHashCode
 @Data
@@ -19,7 +18,7 @@ public class PersonDto {
     private String name;
 
     @NotNull
-    @Pattern(regexp = "\\d{2}-\\d{2}-\\d{4}", message = "{passport.management.system.constraints.birth.date.format.message}")
+    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}", message = "{passport.management.system.constraints.birth.date.format.message}")
     private String birthDate;
 
     @NotNull

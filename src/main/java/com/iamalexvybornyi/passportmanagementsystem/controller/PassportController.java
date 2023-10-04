@@ -5,6 +5,7 @@ import com.iamalexvybornyi.passportmanagementsystem.dto.passport.CreatePassportD
 import com.iamalexvybornyi.passportmanagementsystem.dto.passport.PassportDto;
 import com.iamalexvybornyi.passportmanagementsystem.dto.passport.PassportWithPersonDto;
 import com.iamalexvybornyi.passportmanagementsystem.service.PassportService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -50,8 +50,8 @@ public class PassportController extends ErrorHandlingController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<PassportDto> getPassports(@Param("startDate") @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate startDate,
-                                          @Param("endDate") @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate endDate) {
+    public List<PassportDto> getPassports(@Param("startDate") @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate startDate,
+                                          @Param("endDate") @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate endDate) {
         return passportService.getPassports(startDate, endDate);
     }
 }

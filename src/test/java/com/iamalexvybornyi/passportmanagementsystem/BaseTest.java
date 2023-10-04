@@ -9,30 +9,37 @@ import com.iamalexvybornyi.passportmanagementsystem.model.passport.PassportType;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Status;
 import com.iamalexvybornyi.passportmanagementsystem.repository.PassportRepository;
 import com.iamalexvybornyi.passportmanagementsystem.repository.PersonRepository;
-import com.iamalexvybornyi.passportmanagementsystem.service.PassportService;
 import com.iamalexvybornyi.passportmanagementsystem.service.PersonService;
 import com.iamalexvybornyi.passportmanagementsystem.util.IdGeneratorUtil;
 import com.iamalexvybornyi.passportmanagementsystem.util.PropertyReaderUtil;
+import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.logging.log4j.io.IoBuilder;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 
+import java.io.PrintStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "/TestValidationMessages.properties")
+@TestPropertySource(locations = {"/TestValidationMessages.properties", "/application.properties"})
 public class BaseTest {
 
     @LocalServerPort
@@ -64,13 +71,16 @@ public class BaseTest {
     protected PersonService personService;
 
     @Autowired
-    protected PassportService passportService;
-
-    @Autowired
     protected PropertyReaderUtil propertyReaderUtil;
 
     @Autowired
     protected IdGeneratorUtil idGeneratorUtil;
+
+    @BeforeAll
+    public static void configure() {
+        final PrintStream logStream = IoBuilder.forLogger().buildPrintStream();
+        RestAssured.filters(new RequestLoggingFilter(logStream), new ResponseLoggingFilter(logStream));
+    }
 
     @BeforeEach
     public void cleanUp() {
@@ -78,11 +88,31 @@ public class BaseTest {
         personRepository.deleteAll();
     }
 
+    @NonNull
+    private RequestSpecification requestSpecification() {
+        return new RequestSpecBuilder()
+                .setBaseUri("http://localhost:" + port)
+                .setAccept(ContentType.JSON)
+                .setContentType(ContentType.JSON)
+                .build();
+    }
+
+    @NonNull
+    protected <T> T extractDataFromResponse(@NonNull Response response, @NonNull Class<T> tClass) {
+        log.info("Extracting data from response {}", response.getBody().asString());
+        return response.then().extract().as(tClass);
+    }
+
+    protected void verifyResponseStatusCode(@NonNull Response response, int expectedStatusCode) {
+        log.info("Verifying the response status code. Expecting {}, the actual code is {}",
+                expectedStatusCode, response.statusCode());
+        response.then().statusCode(expectedStatusCode);
+    }
+
     protected void sendCreatePersonDtoToBasePersonEndpointAndVerifyStatusCode(@NonNull CreatePersonDto createPersonDto,
                                                                               int expectedStatusCode) {
-        sendCreatePersonDtoToBasePersonEndpoint(createPersonDto)
-                .then()
-                .statusCode(expectedStatusCode);
+        final Response response = sendCreatePersonDtoToBasePersonEndpoint(createPersonDto);
+        verifyResponseStatusCode(response, expectedStatusCode);
     }
 
     @NonNull
@@ -96,9 +126,8 @@ public class BaseTest {
     protected void sendCreatePersonDtoToBasePersonEndpointForUpdateAndVerifyStatusCode(@NonNull String id,
                                                                                        @NonNull CreatePersonDto createPersonDto,
                                                                                        int expectedStatusCode) {
-        sendCreatePersonDtoToBasePersonEndpointForUpdate(id, createPersonDto)
-                .then()
-                .statusCode(expectedStatusCode);
+        final Response response = sendCreatePersonDtoToBasePersonEndpointForUpdate(id, createPersonDto);
+        verifyResponseStatusCode(response, expectedStatusCode);
     }
 
     @NonNull
@@ -214,29 +243,11 @@ public class BaseTest {
     }
 
     @NonNull
-    protected <T> T extractDataFromResponse(@NonNull Response response, @NonNull Class<T> tClass) {
-        return response.then().extract().as(tClass);
-    }
-
-    protected void verifyResponseStatusCode(@NonNull Response response, int expectedStatusCode) {
-        response.then().statusCode(expectedStatusCode);
-    }
-
-    @NonNull
-    protected RequestSpecification requestSpecification() {
-        return new RequestSpecBuilder()
-                .setBaseUri("http://localhost:" + port)
-                .setAccept(ContentType.JSON)
-                .setContentType(ContentType.JSON)
-                .build();
-    }
-
-    @NonNull
     protected CreatePersonDto getValidCreatePersonDto() {
         final CreatePersonDto createPersonDto = new CreatePersonDto();
         createPersonDto.setName("Some Name");
         createPersonDto.setBirthCountry("Country");
-        createPersonDto.setBirthDate("01-01-1990");
+        createPersonDto.setBirthDate("1990-01-01");
         return createPersonDto;
     }
 
@@ -247,7 +258,7 @@ public class BaseTest {
         createPassportDto.setPassportType(PassportType.INTERNAL.toString());
         createPassportDto.setDepartmentCode("111-111");
         createPassportDto.setStatus(status.toString());
-        createPassportDto.setGivenDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPassportDto.setGivenDate(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         return createPassportDto;
     }
 

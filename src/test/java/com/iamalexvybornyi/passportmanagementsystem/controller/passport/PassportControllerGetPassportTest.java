@@ -40,7 +40,9 @@ public class PassportControllerGetPassportTest extends BaseTest {
     @Test
     public void getPassport_whenIdExistsAndIsValid_receiveCorrectPassportDto() {
         final Person person = personRepository.findAll().iterator().next();
-        final Passport passport = person.getPassports().stream().findAny().orElseThrow(EntityNotFoundException::new);
+        final Passport passport = passportRepository.findByPersonId(person.getId())
+                .stream().findFirst()
+                .orElseThrow(EntityNotFoundException::new);
         final PassportWithPersonDto expectedPassport = passportConverter.passportToPassportWithPersonDto(passport);
         expectedPassport.setPerson(personConverter.personToPersonDto(person));
         final Response response = getPassportByIdFromPassportEndpoint(passport.getId());

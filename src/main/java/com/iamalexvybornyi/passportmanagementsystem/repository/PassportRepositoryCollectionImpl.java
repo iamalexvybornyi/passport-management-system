@@ -1,6 +1,5 @@
 package com.iamalexvybornyi.passportmanagementsystem.repository;
 
-import com.iamalexvybornyi.passportmanagementsystem.model.Person;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Passport;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -11,13 +10,12 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Repository
+//@Repository
 @RequiredArgsConstructor
 public class PassportRepositoryCollectionImpl implements PassportRepository {
 
+    @NonNull
     private final Set<Passport> passports = new HashSet<>();
-
-    private final PersonRepository personRepository;
 
     @Override
     @NonNull
@@ -42,6 +40,14 @@ public class PassportRepositoryCollectionImpl implements PassportRepository {
                 .filter(passport -> passport.getPassportNumber().equals(passportNumber))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Override
+    @NonNull
+    public List<Passport> findByPersonId(@NonNull String personId) {
+        return this.passports.stream()
+                .filter(passport -> passport.getPersonId().equals(personId))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -71,8 +77,6 @@ public class PassportRepositoryCollectionImpl implements PassportRepository {
 
     @Override
     public void delete(@NonNull Passport passport) {
-        final Person person = personRepository.findByPassportNumber(passport.getPassportNumber());
-        personRepository.findById(person.getId()).getPassports().remove(passport);
         this.passports.remove(passport);
     }
 
@@ -80,11 +84,7 @@ public class PassportRepositoryCollectionImpl implements PassportRepository {
     public void deleteAll() {
         final Iterator<Passport> passportIterator = this.passports.iterator();
         while (passportIterator.hasNext()) {
-            final Passport passport = passportIterator.next();
-            final Person person = personRepository.findByPassportNumber(passport.getPassportNumber());
-            if (person != null) {
-                personRepository.findById(person.getId()).getPassports().remove(passport);
-            }
+            passportIterator.next();
             passportIterator.remove();
         }
     }

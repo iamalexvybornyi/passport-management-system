@@ -53,7 +53,7 @@ public class PassportControllerUpdatePassportTest extends BaseTest {
         createPassportDto.setPassportType(PassportType.INTERNAL.toString());
         createPassportDto.setDepartmentCode("222-222");
         createPassportDto.setStatus(Status.INACTIVE.toString());
-        createPassportDto.setGivenDate(LocalDate.now().minusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        createPassportDto.setGivenDate(LocalDate.now().minusDays(7).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         final Response response = sendCreatePassportDtoToPassportEndpointForUpdate(passport.getId(), createPassportDto);
         final PassportDto actualPassport = extractDataFromResponse(response, PassportDto.class);
         final PassportDto expectedPassport = passportConverter.passportToPassportDto(passportRepository.findById(passport.getId()));

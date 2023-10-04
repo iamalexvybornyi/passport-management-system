@@ -8,13 +8,13 @@ import com.iamalexvybornyi.passportmanagementsystem.dto.person.PersonDto;
 import com.iamalexvybornyi.passportmanagementsystem.model.passport.Status;
 import com.iamalexvybornyi.passportmanagementsystem.service.PersonService;
 import com.iamalexvybornyi.passportmanagementsystem.validation.ValueOfEnum;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @AllArgsConstructor
